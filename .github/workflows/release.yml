@@ -1,0 +1,45 @@
+name: Rust checks and Windows release
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - run: cargo fmt --check
+      - run: cargo test --locked
+      - run: cargo clippy --locked -- -D warnings
+      - run: cargo build --release --locked
+        env:
+          ARK_BUILD_SHA: ${{ github.sha }}
+      - name: Prepare release
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        run: |
+          $version = (Select-String -Path Cargo.toml -Pattern '^version = "([^"]+)"').Matches[0].Groups[1].Value
+          if ($env:GITHUB_REF_NAME -ne "v$version") { throw 'Tag and Cargo version differ' }
+          $asset = 'ark-server-panel-windows-x64.exe'
+          Copy-Item target/release/ark-server-panel.exe $asset
+          $manifest = @{ name='ark-server-panel'; version=$version; sourceSha=$env:GITHUB_SHA; asset=$asset; size=(Get-Item $asset).Length; sha256=(Get-FileHash $asset -Algorithm SHA256).Hash.ToLowerInvariant() }
+          $manifest | ConvertTo-Json | Set-Content release.json -Encoding utf8NoBOM
+          Compress-Archive -Path 'Ouvrir ARK Panel.vbs',launch.ps1,README.md -DestinationPath ark-server-panel-install.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ark-server-panel-windows
+          path: target/release/ark-server-panel.exe
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: gh release create $env:GITHUB_REF_NAME ark-server-panel-windows-x64.exe release.json ark-server-panel-install.zip --verify-tag --title "ARK Server Panel $env:GITHUB_REF_NAME" --generate-notes
+    permissions:
+      contents: write
