@@ -1,5 +1,59 @@
 use crate::{manager::hash_tree, model::*, server::backup_operation, updates::*};
 use std::{fs, path::PathBuf};
+
+#[cfg(windows)]
+#[test]
+fn process_identity_is_recovered_with_mixed_windows_separators() {
+    use crate::manager::{Identity, Manager, hidden};
+    use std::process::{Command, Stdio};
+    use sysinfo::{Pid, System};
+    let t = Temp::new();
+    let executable = PathBuf::from(std::env::var_os("SystemRoot").unwrap())
+        .join("System32/WindowsPowerShell/v1.0/powershell.exe");
+    let child = hidden(Command::new(&executable).args([
+        "-NoProfile",
+        "-NonInteractive",
+        "-Command",
+        "Start-Sleep -Seconds 30",
+    ]))
+    .stdout(Stdio::null())
+    .stderr(Stdio::null())
+    .spawn()
+    .unwrap();
+    let pid = child.id();
+    let system = System::new_all();
+    let start = system.process(Pid::from_u32(pid)).unwrap().start_time();
+    let mut manager = Manager::new(t.0.clone()).unwrap();
+    manager.identities.insert(
+        "test".into(),
+        Identity {
+            pid,
+            start,
+            executable: executable.to_string_lossy().replace('\\', "/"),
+        },
+    );
+    manager.children.insert("test".into(), child);
+    manager.persist().unwrap();
+    drop(manager); // Close the old panel's handles; the process must continue.
+    let mut recovered = Manager::new(t.0.clone()).unwrap();
+    let recognized = recovered.running("test");
+    recovered.identities.get_mut("test").unwrap().start += 1;
+    let rejects_reused_pid = !recovered.running("test");
+    let system = System::new_all();
+    if let Some(process) = system.process(Pid::from_u32(pid))
+        && process.start_time() == start
+    {
+        process.kill();
+    }
+    assert!(
+        recognized,
+        "A persisted executable path with mixed separators must match the running Windows process"
+    );
+    assert!(
+        rejects_reused_pid,
+        "A different creation time must reject a reused PID"
+    );
+}
 struct Temp(PathBuf);
 impl Temp {
     fn new() -> Self {

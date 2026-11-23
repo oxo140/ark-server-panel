@@ -20,6 +20,14 @@ pub fn hidden(command: &mut Command) -> &mut Command {
 pub fn executable(p: &Profile) -> PathBuf {
     Path::new(&p.directory).join("ShooterGame/Binaries/Win64/ArkAscendedServer.exe")
 }
+fn normalized_executable(path: &Path) -> String {
+    path.canonicalize()
+        .unwrap_or_else(|_| path.to_path_buf())
+        .to_string_lossy()
+        .replace('/', "\\")
+        .trim_start_matches("\\\\?\\")
+        .to_lowercase()
+}
 #[derive(Clone, Default, Serialize, Deserialize)]
 pub struct Identity {
     pub pid: u32,
@@ -48,17 +56,16 @@ impl Manager {
         let exe = executable(p);
         let system = System::new_all();
         if let Some((pid, process)) = system.processes().iter().find(|(_, process)| {
-            process.exe().is_some_and(|e| {
-                e.to_string_lossy()
-                    .eq_ignore_ascii_case(&exe.to_string_lossy())
-            })
+            process
+                .exe()
+                .is_some_and(|e| normalized_executable(e) == normalized_executable(&exe))
         }) {
             self.identities.insert(
                 p.id.clone(),
                 Identity {
                     pid: pid.as_u32(),
                     start: process.start_time(),
-                    executable: exe.to_string_lossy().into(),
+                    executable: normalized_executable(&exe),
                 },
             );
         }
@@ -83,8 +90,8 @@ impl Manager {
                 p.start_time() == identity.start
                     && p.exe()
                         .map(|p| {
-                            p.to_string_lossy()
-                                .eq_ignore_ascii_case(&identity.executable)
+                            normalized_executable(p)
+                                == normalized_executable(Path::new(&identity.executable))
                         })
                         .unwrap_or(false)
             })
@@ -147,7 +154,7 @@ impl Manager {
             Identity {
                 pid,
                 start,
-                executable: exe.to_string_lossy().into(),
+                executable: normalized_executable(&exe),
             },
         );
         self.children.insert(p.id.clone(), child);
