@@ -62,7 +62,10 @@ pub async fn supervise() -> Result<(), String> {
             Ok(child) => child,
             Err(_) if candidate.is_some() => {
                 fs::remove_file(&pending_file).map_err(|e| e.to_string())?;
-                save(&dir.join("last-update.json"), &serde_json::json!({"success":false,"message":"Le fichier de mise à jour ne peut pas être exécuté. Retour à la version précédente."}))?;
+                save(
+                    &dir.join("last-update.json"),
+                    &serde_json::json!({"success":false,"message":"Le fichier de mise à jour ne peut pas être exécuté. Retour à la version précédente."}),
+                )?;
                 continue;
             }
             Err(e) => return Err(e.to_string()),

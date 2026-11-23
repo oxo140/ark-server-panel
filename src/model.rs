@@ -113,7 +113,9 @@ pub fn validate_profile(p: &Profile, profiles: &[Profile], data: &Path) -> Resul
         return Err("Nom requis, limité à 100 caractères.".into());
     }
     if p.name.chars().any(|c| c.is_control() || "?\"".contains(c)) {
-        return Err("Le nom ne peut pas contenir de guillemets, ? ou caractères de contrôle.".into());
+        return Err(
+            "Le nom ne peut pas contenir de guillemets, ? ou caractères de contrôle.".into(),
+        );
     }
     let dir = Path::new(&p.directory);
     if !dir.is_absolute()
