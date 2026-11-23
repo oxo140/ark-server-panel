@@ -1,7 +1,10 @@
+mod catalog;
+mod config;
 mod manager;
 mod model;
 mod rcon;
 mod server;
+mod steamcmd;
 mod supervisor;
 mod updates;
 

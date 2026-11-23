@@ -194,7 +194,7 @@ pub fn admin_password(p: &Profile) -> Result<String, String> {
     let mut password = None;
     let mut enabled = false;
     for line in text.lines() {
-        let line = line.trim();
+        let line = line.trim_start_matches('\u{feff}').trim();
         if line.starts_with('[') {
             section = line.eq_ignore_ascii_case("[ServerSettings]");
         }

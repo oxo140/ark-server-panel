@@ -1,0 +1,765 @@
+use crate::model::{self, Profile};
+use serde::Serialize;
+use serde_json::{Value, json};
+use sha2::{Digest, Sha256};
+use std::{collections::BTreeMap, fs, path::Path};
+
+pub const GUS: &str = "GameUserSettings.ini";
+pub const GAME: &str = "Game.ini";
+const SERVER: &str = "ServerSettings";
+const MODE: &str = "/Script/ShooterGame.ShooterGameMode";
+
+#[derive(Clone, Serialize)]
+pub struct Setting {
+    pub key: &'static str,
+    pub file: &'static str,
+    pub section: &'static str,
+    pub label: &'static str,
+    pub category: &'static str,
+    pub description: &'static str,
+    pub kind: &'static str,
+    pub min: f64,
+    pub max: f64,
+    pub step: f64,
+    pub default: Value,
+}
+fn number(
+    key: &'static str,
+    file: &'static str,
+    label: &'static str,
+    category: &'static str,
+    description: &'static str,
+    range: (f64, f64, f64),
+    default: f64,
+) -> Setting {
+    Setting {
+        key,
+        file,
+        section: if file == GUS { SERVER } else { MODE },
+        label,
+        category,
+        description,
+        kind: "number",
+        min: range.0,
+        max: range.1,
+        step: range.2,
+        default: json!(default),
+    }
+}
+fn boolean(
+    key: &'static str,
+    file: &'static str,
+    label: &'static str,
+    category: &'static str,
+    description: &'static str,
+    default: bool,
+) -> Setting {
+    Setting {
+        key,
+        file,
+        section: if file == GUS { SERVER } else { MODE },
+        label,
+        category,
+        description,
+        kind: "boolean",
+        min: 0.,
+        max: 1.,
+        step: 1.,
+        default: json!(default),
+    }
+}
+pub fn schema() -> Vec<Setting> {
+    vec![
+        boolean(
+            "ServerPVE",
+            GUS,
+            "Mode PvE",
+            "Règles du monde",
+            "Active le mode joueur contre environnement.",
+            false,
+        ),
+        number(
+            "DifficultyOffset",
+            GUS,
+            "Difficulté de base",
+            "Règles du monde",
+            "Avec une difficulté maximale de 5 et cette valeur à 1, la plupart des dinos sauvages culminent au niveau 150.",
+            (0., 1., 0.1),
+            1.,
+        ),
+        number(
+            "OverrideOfficialDifficulty",
+            GUS,
+            "Difficulté maximale",
+            "Règles du monde",
+            "5 correspond généralement au niveau sauvage 150. Les dinos déjà présents ne changent pas de niveau.",
+            (0., 10., 0.5),
+            0.,
+        ),
+        boolean(
+            "bUseSingleplayerSettings",
+            GAME,
+            "Bonus du mode solo natif",
+            "Règles du monde",
+            "Cumule des bonus cachés avec vos taux. Les préréglages du panneau le désactivent pour garder des taux prévisibles.",
+            false,
+        ),
+        number(
+            "XPMultiplier",
+            GUS,
+            "Expérience",
+            "Progression & récolte",
+            "Plus élevé : progression des niveaux plus rapide.",
+            (0.1, 20., 0.1),
+            1.,
+        ),
+        number(
+            "HarvestAmountMultiplier",
+            GUS,
+            "Quantité de ressources",
+            "Progression & récolte",
+            "Plus élevé : davantage de ressources à chaque récolte.",
+            (0.1, 20., 0.1),
+            1.,
+        ),
+        number(
+            "HarvestHealthMultiplier",
+            GUS,
+            "Résistance des ressources",
+            "Progression & récolte",
+            "Plus élevé : les rochers et arbres nécessitent davantage de coups.",
+            (0.1, 10., 0.1),
+            1.,
+        ),
+        number(
+            "ResourcesRespawnPeriodMultiplier",
+            GUS,
+            "Délai de réapparition des ressources",
+            "Progression & récolte",
+            "Plus bas : les ressources réapparaissent plus vite, sous réserve des distances de blocage.",
+            (0.01, 5., 0.01),
+            1.,
+        ),
+        number(
+            "TamingSpeedMultiplier",
+            GUS,
+            "Vitesse d’apprivoisement",
+            "Apprivoisement",
+            "Plus élevé : apprivoisement plus rapide. Dépend aussi de la nourriture et de l’espèce.",
+            (0.1, 50., 0.1),
+            1.,
+        ),
+        number(
+            "DinoCharacterFoodDrainMultiplier",
+            GUS,
+            "Consommation de nourriture des dinos",
+            "Apprivoisement",
+            "Agit aussi sur les intervalles de repas pendant l’apprivoisement.",
+            (0.1, 5., 0.1),
+            1.,
+        ),
+        number(
+            "MatingIntervalMultiplier",
+            GAME,
+            "Intervalle entre reproductions",
+            "Élevage & imprégnation",
+            "Plus bas : les femelles peuvent se reproduire plus souvent.",
+            (0.001, 5., 0.001),
+            1.,
+        ),
+        number(
+            "MatingSpeedMultiplier",
+            GAME,
+            "Vitesse d’accouplement",
+            "Élevage & imprégnation",
+            "Plus élevé : accouplement plus rapide.",
+            (0.1, 20., 0.1),
+            1.,
+        ),
+        number(
+            "EggHatchSpeedMultiplier",
+            GAME,
+            "Éclosion et gestation",
+            "Élevage & imprégnation",
+            "Plus élevé : incubation des œufs et gestation plus rapides.",
+            (0.1, 200., 0.1),
+            1.,
+        ),
+        number(
+            "BabyMatureSpeedMultiplier",
+            GAME,
+            "Croissance des bébés",
+            "Élevage & imprégnation",
+            "Plus élevé : maturation plus rapide. À accorder avec l’intervalle de soins.",
+            (0.1, 200., 0.1),
+            1.,
+        ),
+        number(
+            "BabyCuddleIntervalMultiplier",
+            GAME,
+            "Intervalle des soins",
+            "Élevage & imprégnation",
+            "Plus bas : soins demandés plus tôt. 0,033333 équivaut à environ 16 minutes pour une base de 8 h.",
+            (0.001, 2., 0.001),
+            1.,
+        ),
+        number(
+            "BabyImprintAmountMultiplier",
+            GAME,
+            "Imprégnation gagnée par soin",
+            "Élevage & imprégnation",
+            "Plus élevé : davantage d’imprégnation à chaque interaction. Le résultat dépend de l’espèce.",
+            (0.1, 100., 0.1),
+            1.,
+        ),
+        number(
+            "BabyImprintingStatScaleMultiplier",
+            GAME,
+            "Bonus des statistiques d’imprégnation",
+            "Élevage & imprégnation",
+            "1 conserve le bonus normal. Les préréglages ne renforcent pas ce bonus.",
+            (0., 5., 0.1),
+            1.,
+        ),
+        number(
+            "BabyFoodConsumptionSpeedMultiplier",
+            GAME,
+            "Consommation des bébés",
+            "Élevage & imprégnation",
+            "Plus bas : les bébés consomment moins de nourriture.",
+            (0.1, 5., 0.1),
+            1.,
+        ),
+        number(
+            "LayEggIntervalMultiplier",
+            GAME,
+            "Intervalle de ponte",
+            "Agriculture & durée du jour",
+            "Plus bas : les œufs non fécondés sont pondus plus souvent.",
+            (0.1, 5., 0.1),
+            1.,
+        ),
+        number(
+            "CropGrowthSpeedMultiplier",
+            GAME,
+            "Croissance des cultures",
+            "Agriculture & durée du jour",
+            "Plus élevé : les cultures poussent plus vite.",
+            (0.1, 20., 0.1),
+            1.,
+        ),
+        number(
+            "DayCycleSpeedScale",
+            GUS,
+            "Vitesse du cycle jour / nuit",
+            "Agriculture & durée du jour",
+            "Plus bas : journées et nuits plus longues.",
+            (0.1, 5., 0.1),
+            1.,
+        ),
+        number(
+            "DayTimeSpeedScale",
+            GUS,
+            "Vitesse du jour",
+            "Agriculture & durée du jour",
+            "Plus bas : le jour dure plus longtemps.",
+            (0.1, 5., 0.1),
+            1.,
+        ),
+        number(
+            "NightTimeSpeedScale",
+            GUS,
+            "Vitesse de la nuit",
+            "Agriculture & durée du jour",
+            "Plus élevé : les nuits passent plus vite.",
+            (0.1, 5., 0.1),
+            1.,
+        ),
+        number(
+            "PlayerCharacterFoodDrainMultiplier",
+            GUS,
+            "Faim du joueur",
+            "Survie & confort",
+            "Plus bas : le joueur a moins souvent faim.",
+            (0.1, 5., 0.1),
+            1.,
+        ),
+        number(
+            "PlayerCharacterWaterDrainMultiplier",
+            GUS,
+            "Soif du joueur",
+            "Survie & confort",
+            "Plus bas : le joueur a moins souvent soif.",
+            (0.1, 5., 0.1),
+            1.,
+        ),
+        number(
+            "PlayerCharacterStaminaDrainMultiplier",
+            GUS,
+            "Consommation d’endurance",
+            "Survie & confort",
+            "Plus bas : l’endurance du joueur diminue moins vite.",
+            (0.1, 5., 0.1),
+            1.,
+        ),
+        number(
+            "PlayerCharacterHealthRecoveryMultiplier",
+            GUS,
+            "Récupération de santé",
+            "Survie & confort",
+            "Plus élevé : récupération naturelle plus rapide.",
+            (0.1, 5., 0.1),
+            1.,
+        ),
+        number(
+            "PerLevelStatsMultiplier_Player[7]",
+            GAME,
+            "Poids gagné par niveau du joueur",
+            "Survie & confort",
+            "Multiplie uniquement les points de poids investis par le joueur, sans modifier les dinos.",
+            (0.1, 10., 0.1),
+            1.,
+        ),
+        boolean(
+            "AllowFlyerCarryPvE",
+            GUS,
+            "Transport par les volants en PvE",
+            "Survie & confort",
+            "Autorise les volants à porter des créatures en PvE.",
+            false,
+        ),
+        boolean(
+            "ShowMapPlayerLocation",
+            GUS,
+            "Position du joueur sur la carte",
+            "Affichage",
+            "Affiche la position du joueur sur sa carte.",
+            true,
+        ),
+        boolean(
+            "ServerCrosshair",
+            GUS,
+            "Réticule",
+            "Affichage",
+            "Affiche le réticule de visée.",
+            false,
+        ),
+        boolean(
+            "AllowThirdPersonPlayer",
+            GUS,
+            "Vue à la troisième personne",
+            "Affichage",
+            "Autorise la vue à la troisième personne.",
+            false,
+        ),
+        boolean(
+            "ShowFloatingDamageText",
+            GUS,
+            "Nombres de dégâts",
+            "Affichage",
+            "Affiche les nombres de dégâts.",
+            false,
+        ),
+    ]
+}
+pub fn presets() -> Value {
+    let shared = json!({"ServerPVE":true,"DifficultyOffset":1,"OverrideOfficialDifficulty":5,"bUseSingleplayerSettings":false,"BabyImprintAmountMultiplier":2,"BabyImprintingStatScaleMultiplier":1,"AllowFlyerCarryPvE":true,"ShowMapPlayerLocation":true,"ServerCrosshair":true,"AllowThirdPersonPlayer":true});
+    let mut solo = shared.clone();
+    let mut duo = shared;
+    solo.as_object_mut().unwrap().extend(json!({"XPMultiplier":2,"HarvestAmountMultiplier":3,"TamingSpeedMultiplier":5,"ResourcesRespawnPeriodMultiplier":0.5,"MatingIntervalMultiplier":0.1,"MatingSpeedMultiplier":2,"EggHatchSpeedMultiplier":30,"BabyMatureSpeedMultiplier":30,"BabyCuddleIntervalMultiplier":0.033333,"BabyFoodConsumptionSpeedMultiplier":0.5,"CropGrowthSpeedMultiplier":3,"LayEggIntervalMultiplier":0.5,"PlayerCharacterFoodDrainMultiplier":0.5,"PlayerCharacterWaterDrainMultiplier":0.5,"PerLevelStatsMultiplier_Player[7]":2,"NightTimeSpeedScale":2}).as_object().unwrap().clone());
+    duo.as_object_mut().unwrap().extend(json!({"XPMultiplier":1.5,"HarvestAmountMultiplier":2,"TamingSpeedMultiplier":3,"ResourcesRespawnPeriodMultiplier":0.75,"MatingIntervalMultiplier":0.2,"MatingSpeedMultiplier":1.5,"EggHatchSpeedMultiplier":15,"BabyMatureSpeedMultiplier":15,"BabyCuddleIntervalMultiplier":0.066667,"BabyFoodConsumptionSpeedMultiplier":0.75,"CropGrowthSpeedMultiplier":2,"LayEggIntervalMultiplier":0.75,"PlayerCharacterFoodDrainMultiplier":0.75,"PlayerCharacterWaterDrainMultiplier":0.75,"PerLevelStatsMultiplier_Player[7]":1.5,"NightTimeSpeedScale":1.5}).as_object().unwrap().clone());
+    json!([
+        {"id":"solo","label":"Solo PvE confort","summary":"XP ×2 · récolte ×3 · apprivoisement ×5 · élevage ×30","description":"Moins de corvées et d’attente pour une personne. Poids par niveau ×2. Ne modifie pas les dégâts ni la résistance. Bonus d’imprégnation standard.","values":solo},
+        {"id":"duo","label":"Duo PvE équilibré","summary":"XP ×1,5 · récolte ×2 · apprivoisement ×3 · élevage ×15","description":"Progression plus proche du jeu de base pour deux joueurs, avec des temps d’attente réduits. Poids par niveau ×1,5.","values":duo}
+    ])
+}
+fn header(line: &str) -> Option<&str> {
+    let t = line.trim_start_matches('\u{feff}').trim();
+    if t.starts_with('[') && t.ends_with(']') {
+        Some(&t[1..t.len() - 1])
+    } else {
+        None
+    }
+}
+fn entry(line: &str) -> Option<(&str, &str)> {
+    let line = line.trim_start_matches('\u{feff}').trim();
+    if line.starts_with(';') || line.starts_with('#') {
+        None
+    } else {
+        line.split_once('=').map(|(a, b)| (a.trim(), b.trim()))
+    }
+}
+fn scalar(value: &str) -> &str {
+    value
+        .split(" ;")
+        .next()
+        .unwrap_or(value)
+        .split(" #")
+        .next()
+        .unwrap_or(value)
+        .trim()
+}
+pub fn read_value(text: &str, section: &str, key: &str) -> Option<String> {
+    let mut active = false;
+    let mut found = None;
+    for line in text.lines() {
+        if let Some(h) = header(line) {
+            active = h.eq_ignore_ascii_case(section);
+        } else if active
+            && let Some((k, v)) = entry(line)
+            && k.eq_ignore_ascii_case(key)
+        {
+            found = Some(scalar(v).into());
+        }
+    }
+    found
+}
+pub fn patch(text: &str, section: &str, key: &str, value: &str) -> String {
+    let newline = if text.contains("\r\n") { "\r\n" } else { "\n" };
+    let mut lines: Vec<String> = text.split_inclusive('\n').map(String::from).collect();
+    let mut active = false;
+    let mut found = false;
+    let mut insertion = None;
+    for (i, line) in lines.iter_mut().enumerate() {
+        if let Some(h) = header(line) {
+            if active {
+                insertion = Some(i);
+            }
+            active = h.eq_ignore_ascii_case(section);
+            if active {
+                insertion = Some(i + 1);
+            }
+            continue;
+        }
+        if active {
+            insertion = Some(i + 1);
+            if let Some((k, _)) = entry(line)
+                && k.eq_ignore_ascii_case(key)
+            {
+                let eq = line.find('=').unwrap();
+                let ending = if line.ends_with("\r\n") {
+                    "\r\n"
+                } else if line.ends_with('\n') {
+                    "\n"
+                } else {
+                    ""
+                };
+                let raw = &line[eq + 1..line.len() - ending.len()];
+                let whitespace = &raw[..raw.len() - raw.trim_start().len()];
+                let comment_index = raw.find(" ;").or_else(|| raw.find(" #"));
+                let suffix = comment_index.map(|i| &raw[i..]).unwrap_or("");
+                *line = format!(
+                    "{}{}{}{}{}",
+                    &line[..eq + 1],
+                    whitespace,
+                    value,
+                    suffix,
+                    ending
+                );
+                found = true;
+            }
+        }
+    }
+    if !found {
+        let line = format!("{key}={value}{newline}");
+        if let Some(i) = insertion {
+            if i > 0 && !lines[i - 1].ends_with('\n') {
+                lines[i - 1].push_str(newline);
+            }
+            lines.insert(i, line);
+        } else {
+            if !text.is_empty() && !text.ends_with('\n') {
+                lines.push(newline.into());
+            }
+            lines.push(format!("[{section}]{newline}{line}"));
+        }
+    }
+    lines.concat()
+}
+pub fn hash(bytes: &[u8]) -> String {
+    format!("{:x}", Sha256::digest(bytes))
+}
+fn read_file(p: &Profile, name: &str) -> Result<(bool, String), String> {
+    match fs::read(model::ini_path(p, name)?) {
+        Ok(bytes) => {
+            if bytes.len() > 1024 * 1024 {
+                return Err("Configuration trop volumineuse.".into());
+            }
+            String::from_utf8(bytes).map(|s| (true, s)).map_err(|_| {
+                "Édition guidée : convertir une copie des fichiers en UTF-8 avant modification."
+                    .into()
+            })
+        }
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok((false, String::new())),
+        Err(e) => Err(e.to_string()),
+    }
+}
+pub fn read(p: &Profile) -> Result<Value, String> {
+    let (_, gus) = read_file(p, GUS)?;
+    let (_, game) = read_file(p, GAME)?;
+    let fields:Vec<_>=schema().iter().map(|s|{
+        let raw=read_value(if s.file==GUS{&gus}else{&game},s.section,s.key);
+        let parsed=raw.as_ref().and_then(|v|if s.kind=="boolean" {match v.to_ascii_lowercase().as_str(){"true"|"1"=>Some(json!(true)),"false"|"0"=>Some(json!(false)),_=>None}}else{v.parse::<f64>().ok().filter(|n|n.is_finite()).map(|n|json!(n))});
+        let mut field=serde_json::to_value(s).unwrap();field["configured"]=json!(raw.is_some());field["value"]=parsed.clone().unwrap_or_else(||s.default.clone());
+        field["warning"]=if raw.is_some()&&parsed.is_none(){json!("Valeur actuelle non reconnue. Elle sera conservée tant que vous ne modifiez pas ce réglage.")}else{Value::Null};field
+    }).collect();
+    Ok(
+        json!({"fields":fields,"hashes":{"GameUserSettings.ini":hash(gus.as_bytes()),"Game.ini":hash(game.as_bytes())},"presets":presets()}),
+    )
+}
+pub fn validate_changes(changes: &Value) -> Result<Vec<(Setting, String)>, String> {
+    let object = changes.as_object().ok_or("Liste de réglages invalide")?;
+    if object.is_empty() {
+        return Err("Aucun réglage modifié.".into());
+    }
+    let definitions = schema();
+    let mut result = vec![];
+    for (key, value) in object {
+        let s = definitions
+            .iter()
+            .find(|s| s.key == key)
+            .ok_or_else(|| format!("Réglage non autorisé : {key}"))?;
+        let text = if s.kind == "boolean" {
+            if value
+                .as_bool()
+                .ok_or("Une case doit contenir true ou false")?
+            {
+                "True".into()
+            } else {
+                "False".into()
+            }
+        } else {
+            let n = value
+                .as_f64()
+                .filter(|n| n.is_finite() && *n >= s.min && *n <= s.max)
+                .ok_or_else(|| {
+                    format!("{} : valeur attendue entre {} et {}", s.label, s.min, s.max)
+                })?;
+            n.to_string()
+        };
+        result.push((s.clone(), text));
+    }
+    Ok(result)
+}
+pub fn save(p: &Profile, hashes: &Value, changes: &Value) -> Result<(), String> {
+    save_with(p, hashes, changes, model::save_bytes)
+}
+fn save_with(
+    p: &Profile,
+    hashes: &Value,
+    changes: &Value,
+    mut write: impl FnMut(&Path, &[u8]) -> Result<(), String>,
+) -> Result<(), String> {
+    let validated = validate_changes(changes)?;
+    let mut docs = BTreeMap::new();
+    for name in [GUS, GAME] {
+        let (existed, text) = read_file(p, name)?;
+        if hashes[name].as_str() != Some(&hash(text.as_bytes())) {
+            return Err(
+                "Un fichier INI a changé depuis son ouverture. Rechargez les réglages.".into(),
+            );
+        }
+        docs.insert(name, (existed, text.clone(), text));
+    }
+    for (s, value) in validated {
+        let doc = docs.get_mut(s.file).unwrap();
+        doc.2 = patch(&doc.2, s.section, s.key, &value);
+    }
+    let changed: Vec<_> = docs
+        .iter()
+        .filter(|(_, (_, before, after))| before != after)
+        .collect();
+    let backup_id = uuid::Uuid::new_v4();
+    for (name, (existed, _, _)) in &changed {
+        let path = model::ini_path(p, name)?;
+        fs::create_dir_all(path.parent().unwrap()).map_err(|e| e.to_string())?;
+        if *existed {
+            fs::copy(&path, path.with_extension(format!("ini.{backup_id}.bak")))
+                .map_err(|e| e.to_string())?;
+        }
+    }
+    let mut written = vec![];
+    for (name, (_, _, after)) in &changed {
+        let path = model::ini_path(p, name)?;
+        if let Err(error) = write(&path, after.as_bytes()) {
+            let mut rollback_errors = vec![];
+            for prior in written {
+                let (existed, before, _) = &docs[prior];
+                let path = model::ini_path(p, prior)?;
+                let r = if *existed {
+                    write(&path, before.as_bytes())
+                } else {
+                    fs::remove_file(path).map_err(|e| e.to_string())
+                };
+                if let Err(e) = r {
+                    rollback_errors.push(e);
+                }
+            }
+            return Err(if rollback_errors.is_empty() {
+                format!(
+                    "Échec d’enregistrement ; les modifications précédentes ont été annulées : {error}"
+                )
+            } else {
+                format!(
+                    "Échec d’enregistrement et restauration incomplète. Utiliser les copies .{backup_id}.bak : {error}"
+                )
+            });
+        }
+        written.push(*name);
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    fn fixture() -> (std::path::PathBuf, Profile) {
+        let root = std::env::temp_dir().join(format!("ark-tuning-{}", uuid::Uuid::new_v4()));
+        fs::create_dir_all(&root).unwrap();
+        let p = Profile {
+            id: "tuning-test".into(),
+            name: "test".into(),
+            directory: root.join("server").to_string_lossy().into(),
+            map: "TheIsland_WP".into(),
+            game_port: 7777,
+            rcon_port: 27020,
+            mods: String::new(),
+        };
+        (root, p)
+    }
+    fn write_fixture(p: &Profile) {
+        let path = model::ini_path(p, GUS).unwrap();
+        fs::create_dir_all(path.parent().unwrap()).unwrap();
+        fs::write(path,"[ServerSettings]\r\nServerAdminPassword=leave-this-alone\r\nTamingSpeedMultiplier=2\r\nModSetting=abc\r\n").unwrap();
+        fs::write(model::ini_path(p,GAME).unwrap(),"[/Script/ShooterGame.ShooterGameMode]\nOverrideEngramEntries=A\nOverrideEngramEntries=B\nBabyMatureSpeedMultiplier=1\n").unwrap();
+    }
+    #[test]
+    fn guided_edit_changes_only_requested_values_across_both_files() {
+        let (root, p) = fixture();
+        write_fixture(&p);
+        let before = read(&p).unwrap();
+        assert!(before["hashes"][GUS].is_string());
+        save(
+            &p,
+            &before["hashes"],
+            &json!({"TamingSpeedMultiplier":5,"BabyMatureSpeedMultiplier":30}),
+        )
+        .unwrap();
+        let gus = fs::read_to_string(model::ini_path(&p, GUS).unwrap()).unwrap();
+        let game = fs::read_to_string(model::ini_path(&p, GAME).unwrap()).unwrap();
+        assert!(gus.contains("ServerAdminPassword=leave-this-alone\r\n"));
+        assert!(gus.contains("ModSetting=abc\r\n"));
+        assert!(!gus.contains("XPMultiplier"));
+        assert!(game.contains("OverrideEngramEntries=A\nOverrideEngramEntries=B\n"));
+        assert_eq!(
+            read_value(&game, MODE, "BabyMatureSpeedMultiplier").as_deref(),
+            Some("30")
+        );
+        fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn concurrent_file_edit_prevents_all_writes() {
+        let (root, p) = fixture();
+        write_fixture(&p);
+        let before = read(&p).unwrap();
+        let game_path = model::ini_path(&p, GAME).unwrap();
+        fs::write(&game_path, "external change").unwrap();
+        let gus_before = fs::read(model::ini_path(&p, GUS).unwrap()).unwrap();
+        assert!(
+            save(
+                &p,
+                &before["hashes"],
+                &json!({"TamingSpeedMultiplier":5,"BabyMatureSpeedMultiplier":30})
+            )
+            .is_err()
+        );
+        assert_eq!(fs::read(&game_path).unwrap(), b"external change");
+        assert_eq!(
+            fs::read(model::ini_path(&p, GUS).unwrap()).unwrap(),
+            gus_before
+        );
+        fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn second_file_write_failure_rolls_back_first_file() {
+        let (root, p) = fixture();
+        write_fixture(&p);
+        let before = read(&p).unwrap();
+        let game_path = model::ini_path(&p, GAME).unwrap();
+        let gus_path = model::ini_path(&p, GUS).unwrap();
+        let game_before = fs::read(&game_path).unwrap();
+        let gus_before = fs::read(&gus_path).unwrap();
+        let mut writes = 0;
+        let result = save_with(
+            &p,
+            &before["hashes"],
+            &json!({"TamingSpeedMultiplier":5,"BabyMatureSpeedMultiplier":30}),
+            |path, bytes| {
+                writes += 1;
+                if writes == 2 {
+                    return Err("simulated disk write failure".into());
+                }
+                model::save_bytes(path, bytes)
+            },
+        );
+        assert!(result.is_err());
+        assert_eq!(writes, 3);
+        assert_eq!(fs::read(game_path).unwrap(), game_before);
+        assert_eq!(fs::read(gus_path).unwrap(), gus_before);
+        fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn missing_files_are_created_without_materializing_all_defaults() {
+        let (root, p) = fixture();
+        let before = read(&p).unwrap();
+        assert!(
+            before["fields"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .all(|f| f["configured"] == false)
+        );
+        save(&p, &before["hashes"], &json!({"ServerPVE":true})).unwrap();
+        assert_eq!(
+            fs::read_to_string(model::ini_path(&p, GUS).unwrap()).unwrap(),
+            "[ServerSettings]\nServerPVE=True\n"
+        );
+        assert!(!model::ini_path(&p, GAME).unwrap().exists());
+        fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn patch_preserves_other_keys_duplicates_comments_bom_and_crlf() {
+        let input = "\u{feff}[ServerSettings]\r\n; notes\r\nTamingSpeedMultiplier = 2 ; garder\r\n[Other]\r\nTamingSpeedMultiplier=99\r\nUnknown=x\r\nOverrideEngramEntries=A\r\nOverrideEngramEntries=B\r\n";
+        let output = patch(input, SERVER, "TamingSpeedMultiplier", "5");
+        assert!(output.contains("TamingSpeedMultiplier = 5 ; garder\r\n"));
+        assert!(output.contains("[Other]\r\nTamingSpeedMultiplier=99"));
+        assert!(output.ends_with("OverrideEngramEntries=A\r\nOverrideEngramEntries=B\r\n"));
+        assert!(output.starts_with('\u{feff}'));
+    }
+    #[test]
+    fn patch_inserts_inside_target_section_and_handles_repeated_scalar() {
+        assert_eq!(
+            patch(
+                "[ServerSettings]\nX=1\n[Other]\nY=2",
+                SERVER,
+                "ServerPVE",
+                "True"
+            ),
+            "[ServerSettings]\nX=1\nServerPVE=True\n[Other]\nY=2"
+        );
+        assert_eq!(
+            patch("[ServerSettings]\nX=1\nX=2", SERVER, "X", "3"),
+            "[ServerSettings]\nX=3\nX=3"
+        );
+    }
+    #[test]
+    fn every_preset_is_valid_and_keeps_native_solo_bonuses_off() {
+        for p in presets().as_array().unwrap() {
+            assert!(!validate_changes(&p["values"]).unwrap().is_empty());
+            assert_eq!(p["values"]["bUseSingleplayerSettings"], false);
+            assert_eq!(p["values"]["ServerPVE"], true);
+        }
+        assert!(validate_changes(&json!({"ServerAdminPassword":"bad"})).is_err());
+        assert!(validate_changes(&json!({"XPMultiplier":-1})).is_err());
+    }
+}

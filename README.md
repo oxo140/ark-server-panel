@@ -7,7 +7,7 @@ Panneau web indépendant pour gérer des serveurs **ARK: Survival Ascended sur W
 1. Télécharger `ark-server-panel-install.zip` dans les [publications GitHub](https://github.com/oxo140/ark-server-panel/releases).
 2. Extraire l’archive dans un dossier conservé sur la machine Windows qui héberge ARK.
 3. Ouvrir **Ouvrir ARK Panel.vbs**. Au premier lancement, le script récupère la dernière publication Windows x64 et contrôle son empreinte SHA-256. Le programme ouvre ensuite le navigateur sur `http://127.0.0.1:3080`.
-4. Dans **Paramètres & mises à jour**, renseigner le chemin absolu de `steamcmd.exe`, téléchargé depuis la distribution officielle de Valve.
+4. Dans **Paramètres & mises à jour**, utiliser **Vérifier SteamCMD** pour une installation existante ou **Télécharger SteamCMD** pour installer l’outil officiel Valve. Le bouton **Installer / mettre à jour** d’un serveur effectue cette vérification lui aussi et propose le téléchargement si nécessaire.
 5. Ajouter un profil : un dossier distinct par serveur, une carte et des ports distincts. Cliquer sur **Installer / mettre à jour**, suivre les journaux, puis démarrer le serveur lorsque SteamCMD a terminé avec succès.
 
 Pour reprendre un serveur existant, créer un profil pointant vers son dossier racine contenant `ShooterGame`. La création du profil ne modifie pas ses fichiers. Ne pas cliquer sur l’installation si vous souhaitez uniquement l’importer.
@@ -21,6 +21,9 @@ L’exécutable Rust travaille en arrière-plan : l’administration se fait ent
 - Installation et validation via SteamCMD, état de l’opération et consultation des journaux.
 - Console RCON et demande d’arrêt avec `SaveWorld`, puis `DoExit`. Aucun arrêt forcé automatique.
 - Édition brute de `Game.ini` et `GameUserSettings.ini` en UTF-8, conservation des clés répétées et inconnues, détection des modifications concurrentes, copie préalable et écriture par remplacement atomique.
+- Éditeur guidé de 33 réglages : curseurs, valeurs numériques précises et interrupteurs, regroupés par thème. Seuls les champs modifiés sont écrits ; une erreur sur le second fichier entraîne la restauration du premier.
+- Préréglages **Solo PvE confort** et **Duo PvE équilibré**, préparés en brouillon et ajustables avant enregistrement.
+- Noms lisibles pour les dix cartes ASA disponibles au 23 novembre 2026, avec option de carte personnalisée et conservation de l’identifiant technique au lancement.
 - Sauvegarde du dossier `ShooterGame/Saved` complet, uniquement serveur arrêté, avec contrôle SHA-256 de chaque fichier. Les sauvegardes sont des dossiers, sans compression dans la V1.
 - Restauration avec contrôle d’intégrité et conservation de l’ancien dossier Saved sous un autre nom.
 - Vérification des versions GitHub au démarrage et toutes les douze heures ; téléchargement et activation manuels depuis le panneau.
@@ -38,7 +41,28 @@ ServerAdminPassword=REMPLACER_PAR_UN_MOT_DE_PASSE
 
 Utiliser le même port RCON que dans le profil. Le mot de passe est lu dans le fichier de configuration du serveur au moment de la commande ; le panneau ne le copie pas dans ses profils ni dans Git. L’éditeur INI montre le contenu complet aux administrateurs disposant de la clé d’accès.
 
-Le choix des identifiants de mods et des noms de cartes reste à la charge de l’administrateur. Le panneau transmet les identifiants au serveur ; il ne fournit pas de catalogue CurseForge dans la V1.
+Les cartes proposées sont The Island, Scorched Earth, The Center, Aberration, Extinction, Ragnarok, Valguero, Astraeos, Lost Colony et Genesis: Part 1. Les cartes non encore sorties sur ASA ne sont pas présentées comme disponibles. Pour une carte modée, choisir **Carte personnalisée / mod** et saisir l’identifiant fourni par son auteur. Le choix des identifiants de mods reste à la charge de l’administrateur ; le panneau ne fournit pas de catalogue CurseForge.
+
+## Réglages guidés et préréglages PvE
+
+Dans **Gérer → Configuration INI**, l’éditeur guidé charge automatiquement les valeurs des deux fichiers. Les champs absents affichent une base proposée ; ils ne sont pas ajoutés au fichier tant qu’ils ne sont pas modifiés. Le bouton **Édition texte INI** conserve l’accès aux options avancées et aux paramètres de mods. Les changements des deux modes sont relus lors du passage de l’un à l’autre.
+
+| Base proposée | XP | Récolte | Apprivoisement | Éclosion / croissance |
+| --- | --- | --- | --- | --- |
+| Solo PvE confort | ×2 | ×3 | ×5 | ×30 |
+| Duo PvE équilibré | ×1,5 | ×2 | ×3 | ×15 |
+
+Les deux bases activent PvE, fixent la difficulté maximale à 5 et désactivent `bUseSingleplayerSettings` pour éviter l’empilement de bonus natifs. Elles ajustent aussi les intervalles de reproduction et de soins, la faim, la soif et le poids gagné par niveau. Les dégâts et résistances existants sont conservés. L’imprégnation reste dépendante de l’espèce et des temps de maturation : aucun préréglage ne garantit automatiquement 100 % pour tous les dinos.
+
+Ces profils sont des propositions éditoriales inspirées de retours de joueurs, et non un consensus ni des réglages officiels. Les tendances retenues sont une accélération modérée de la récolte/progression et une réduction plus forte des temps d’attente. Sources : [discussion PvE solo et amis](https://www.reddit.com/r/ARK/comments/os2jzx/), [réglages ASA en petit groupe](https://www.reddit.com/r/ARK/comments/1quthy9/help_us_set_up_our_ark_survival_ascended_server/), [documentation des paramètres](https://ark.wiki.gg/wiki/Server_configuration).
+
+## Installation SteamCMD
+
+Le panneau vérifie d’abord le chemin enregistré, son propre dossier d’outils, `C:\SteamCMD`, un dossier voisin du programme et les emplacements du `PATH`. Un fichier doit être un exécutable Windows PE nommé `steamcmd.exe` ; sa simple présence ne suffit pas.
+
+Si l’outil manque, le panneau propose son téléchargement HTTPS depuis [le serveur officiel Valve](https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip). Seul le membre racine `steamcmd.exe` est extrait, avec limite de taille, contrôle CRC de l’archive et contrôle du format PE. Ce contrôle n’est pas une vérification de signature Authenticode. L’outil est placé dans `%LOCALAPPDATA%\ArkServerPanel\tools\steamcmd` et son chemin est enregistré. Ses composants se mettent à jour au premier lancement.
+
+L’installation de SteamCMD ne démarre pas celle d’ARK : une nouvelle confirmation est demandée pour le serveur choisi. Les commandes d’installation de serveur revérifient l’emplacement juste avant de lancer l’outil.
 
 ## Quatre serveurs sur une machine
 
@@ -103,7 +127,7 @@ cargo build --release --locked
 
 `--serve` démarre le serveur sans superviseur, pour les tests. Les mises à jour depuis l’interface nécessitent le lancement normal supervisé.
 
-Organisation : `src/model.rs` pour les profils et fichiers, `manager.rs` pour les processus et copies vérifiées, `rcon.rs` pour le protocole, `updates.rs` pour GitHub, `supervisor.rs` pour activation/retour arrière, `server.rs` pour l’API et `web/` pour l’interface intégrée.
+Organisation : `src/model.rs` pour les profils et fichiers, `catalog.rs` pour les cartes, `config.rs` pour les réglages guidés et les écritures INI, `steamcmd.rs` pour la détection et le téléchargement de l’outil, `manager.rs` pour les processus et copies vérifiées, `rcon.rs` pour le protocole, `updates.rs` pour GitHub, `supervisor.rs` pour activation/retour arrière, `server.rs` pour l’API et `web/` pour l’interface intégrée.
 
 ## Publier une version
 

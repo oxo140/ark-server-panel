@@ -174,10 +174,7 @@ impl Manager {
                 "Arrêter le serveur et attendre la fin des opérations avant installation.".into(),
             );
         }
-        if !Path::new(steamcmd).is_absolute()
-            || !steamcmd.to_ascii_lowercase().ends_with("steamcmd.exe")
-            || !Path::new(steamcmd).is_file()
-        {
+        if !crate::steamcmd::valid_executable(Path::new(steamcmd)) {
             return Err("Renseigner le chemin absolu de steamcmd.exe dans les paramètres.".into());
         }
         fs::create_dir_all(&p.directory).map_err(|e| e.to_string())?;
