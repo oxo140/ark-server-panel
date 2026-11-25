@@ -7,6 +7,7 @@ mod metrics;
 mod model;
 mod progress;
 mod rcon;
+mod schedule;
 mod server;
 mod startup;
 mod steamcmd;

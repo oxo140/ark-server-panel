@@ -1,5 +1,15 @@
 # Modifications
 
+## 1.6.0 — 25 novembre 2026
+
+- Cartes compactes sur trois colonnes sur grand écran, deux sur écran intermédiaire et une sur mobile ; palette conservée.
+- Liste des serveurs lancés dans la barre latérale, accès aux statistiques et bouton Rejoindre.
+- Pastilles vert/orange/bleu/rouge avec test RCON local périodique ; délai de démarrage de quinze minutes avant de signaler une absence de réponse.
+- Statistiques par serveur : processus, mémoire, durée de fonctionnement et réponse ListPlayers.
+- Export des réglages en JSON et import sur un autre serveur, sans transférer ports, adresses ni secrets ; import INI/texte UTF-8 ou UTF-16 en brouillon dans l’éditeur.
+- Planification persistante par serveur : sauvegarde toutes les N heures (2 par défaut), redémarrage quotidien et vérification/mise à jour ASA quotidienne avec préavis en jeu personnalisable.
+- Arrêt propre confirmé avant copie du monde, sauvegarde vérifiée avant mise à jour, relance uniquement si le serveur était actif ; aucune relance après une mise à jour échouée.
+
 ## 1.5.0 — 25 novembre 2026
 
 - Lancement ARK sans fenêtre de journal : suppression de `-log`, sortie standard récupérée dans le panneau et mode sans console.

@@ -30,6 +30,18 @@ L’exécutable Rust travaille en arrière-plan : l’administration se fait ent
 
 ## RCON et configuration
 
+### Réglages portables et planification
+
+Dans **Stats du serveur → Configuration INI**, **Exporter mes réglages** télécharge un profil JSON des paramètres guidés enregistrés. **Importer un profil JSON** applique ce profil à un serveur arrêté, avec copie préalable et contrôle des modifications concurrentes. Les ports, adresses, mots de passe et clés INI inconnues ne sont pas transférés par ce profil.
+
+**Lire un fichier INI / texte** accepte un fichier UTF-8 ou UTF-16 avec BOM et l’ouvre en brouillon. Vérifier le fichier cible (`Game.ini` ou `GameUserSettings.ini`), puis enregistrer serveur arrêté. En revenant aux réglages guidés, les curseurs reflètent les valeurs reconnues. Les clés inconnues restent accessibles dans l’éditeur texte.
+
+Dans **Planification**, chaque serveur dispose d’options désactivées par défaut : sauvegarde toutes les N heures (2 par défaut), redémarrage quotidien et mise à jour ASA à une heure locale Windows. Le panneau doit continuer à fonctionner dans la zone de notification. Les tâches quotidiennes manquées sont exécutées au retour du panneau ; le premier intervalle de sauvegarde commence à l’activation. Les dernières exécutions persistent après redémarrage du panneau.
+
+Pour un serveur actif, la maintenance diffuse le message RCON chaque minute pendant le préavis (`{minutes}` est remplacé), envoie `SaveWorld` puis `DoExit`, attend la fin du processus, effectue la copie vérifiée et relance le serveur. Une mise à jour vérifie d’abord le build public ; elle interrompt le serveur uniquement si nécessaire et conserve une sauvegarde avant installation. Un arrêt non confirmé annule l’opération ; une mise à jour échouée conserve le serveur arrêté. Les sauvegardes restent sur disque sans purge automatique.
+
+Les pastilles testent RCON toutes les quinze secondes : vert si `ListPlayers` répond, orange pendant les quinze premières minutes de démarrage ou la maintenance, bleu pendant SteamCMD et rouge si arrêté ou sans réponse après ce délai. Le test RCON est local ; la connexion effective depuis un PC joueur dépend aussi de son accès réseau. L’onglet Stats affiche le PID, la mémoire, la durée et la réponse RCON du serveur.
+
 Dans `ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini`, définir :
 
 ```ini

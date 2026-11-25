@@ -28,6 +28,7 @@ pub struct Core {
     operations: HashMap<String, Value>,
     updates: UpdateStatus,
     steam_install: Value,
+    health: HashMap<String, Value>,
 }
 pub struct App {
     core: Mutex<Core>,
@@ -157,6 +158,7 @@ pub async fn serve() -> Result<(), String> {
                 ..Default::default()
             },
             steam_install: Value::Null,
+            health: HashMap::new(),
         }),
         data: data.clone(),
         token,
@@ -167,6 +169,22 @@ pub async fn serve() -> Result<(), String> {
         metrics: crate::metrics::start(data),
     });
     let background = app.clone();
+    let health_app = app.clone();
+    tokio::spawn(async move {
+        loop {
+            refresh_health(&health_app).await;
+            tokio::time::sleep(std::time::Duration::from_secs(15)).await;
+        }
+    });
+    let scheduled = app.clone();
+    tokio::spawn(async move {
+        loop {
+            if let Err(e) = schedule_tick(&scheduled).await {
+                eprintln!("Planification : {e}");
+            }
+            tokio::time::sleep(std::time::Duration::from_secs(30)).await;
+        }
+    });
     tokio::spawn(async move {
         loop {
             let _ = update_check(&background).await;
@@ -460,7 +478,8 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
                 let connection = connections.get(&p.id).cloned().unwrap_or_default();
                 let version = crate::versions::view(&app.data, &p, &job);
                 let operation = core.operations.get(&p.id).cloned();
-                rows.push(json!({"profile":p,"running":running,"job":job,"progress":progress,"connection":connection,"operation":operation,"serverVersion":version,"executablePresent":crate::manager::executable(&p).is_file()}));
+                let health = core.health.get(&p.id).cloned().unwrap_or(Value::Null);
+                rows.push(json!({"profile":p,"running":running,"health":health,"job":job,"progress":progress,"connection":connection,"operation":operation,"serverVersion":version,"executablePresent":crate::manager::executable(&p).is_file()}));
             }
             return Ok(
                 json!({"version":updates::VERSION,"revision":updates::REVISION,"profiles":rows,"settings":{"repository":core.settings.repository,"branch":core.settings.branch,"steamcmd":core.settings.steamcmd},"updates":core.updates,"updateBusy":app.update_busy.load(Ordering::SeqCst),"steamInstalling":app.steam_busy.load(Ordering::SeqCst),"dataDirectory":app.data,"lastUpdate":model::load::<Value>(&app.data.join("last-update.json")).unwrap_or(Value::Null)}),
@@ -470,7 +489,10 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
             return Err("Mise à jour du panneau en cours.".into());
         }
         if action == "saveSettings" {
-            if app.steam_busy.load(Ordering::SeqCst) || core.manager.any_busy() {
+            if app.steam_busy.load(Ordering::SeqCst)
+                || core.manager.any_busy()
+                || core.operations.values().any(|v| v["running"] == true)
+            {
                 return Err(
                     "Attendre la fin de l’installation SteamCMD avant de modifier son chemin."
                         .into(),
@@ -538,6 +560,71 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
             );
         }
         model::validate_profile(&p, &core.settings.profiles, &app.data)?;
+        if action == "readSchedule" || action == "saveSchedule" {
+            let path = app.data.join(format!("schedule-{id}.json"));
+            let previous: crate::schedule::Schedule = model::load(&path)?;
+            if action == "readSchedule" {
+                return Ok(serde_json::to_value(previous).unwrap());
+            }
+            if core
+                .operations
+                .get(id)
+                .is_some_and(|v| v["running"] == true)
+            {
+                return Err(
+                    "Attendez la fin de la maintenance avant de modifier sa programmation.".into(),
+                );
+            }
+            let mut next: crate::schedule::Schedule =
+                serde_json::from_value(input["schedule"].clone()).map_err(|e| e.to_string())?;
+            next.validate()?;
+            next.last_backup = if !previous.backup_enabled && next.backup_enabled {
+                crate::now()
+            } else {
+                previous.last_backup
+            };
+            next.last_restart_day = previous.last_restart_day;
+            next.last_update_day = previous.last_update_day;
+            next.last_result = previous.last_result;
+            model::save(&path, &next)?;
+            return Ok(
+                json!({"message":"Planification enregistrée. Le panneau doit rester ouvert dans la zone de notification."}),
+            );
+        }
+        if action == "serverStats" {
+            core.manager.discover(&p);
+            let system = sysinfo::System::new_all();
+            let process = core.manager.identities.get(id).and_then(|i| {
+                system
+                    .process(sysinfo::Pid::from_u32(i.pid))
+                    .filter(|p| p.start_time() == i.start)
+            });
+            let running = core.manager.running(id);
+            drop(core);
+            let password = model::admin_password(&p);
+            let probe = if running {
+                match password {
+                    Ok(pass) => crate::rcon::command(p.rcon_port, &pass, "ListPlayers").await,
+                    Err(e) => Err(e),
+                }
+            } else {
+                Err("Processus arrêté".into())
+            };
+            return Ok(
+                json!({"running":running,"ready":probe.is_ok(),"probeError":probe.as_ref().err(),"players":probe.as_ref().ok(),"pid":process.map(|p|p.pid().as_u32()),"memoryBytes":process.map(|p|p.memory()),"uptimeSeconds":process.map(|p|p.run_time()),"sampledAt":crate::now()}),
+            );
+        }
+        if action == "exportTuning" {
+            let tuning = crate::config::read(&p)?;
+            let values: serde_json::Map<String, Value> = tuning["fields"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .filter(|f| f["configured"] == true && f["warning"].is_null())
+                .map(|f| (f["key"].as_str().unwrap().to_string(), f["value"].clone()))
+                .collect();
+            return Ok(json!({"format":"ark-panel-tuning-v1","values":values}));
+        }
         if action == "logs" {
             let text = core.manager.logs(&p)?;
             let job = core.manager.job_status(&p.id);
@@ -564,7 +651,10 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
             return crate::config::read(&p);
         }
         if action == "checkServerVersion" {
-            if app.steam_busy.load(Ordering::SeqCst) || core.manager.any_busy() {
+            if app.steam_busy.load(Ordering::SeqCst)
+                || core.manager.any_busy()
+                || core.operations.values().any(|v| v["running"] == true)
+            {
                 return Err("Attendre la fin de l’opération SteamCMD en cours.".into());
             }
             let detected = crate::steamcmd::status(&core.settings.steamcmd, &app.data);
@@ -602,7 +692,9 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
             let output = crate::rcon::command(p.rcon_port, &password, text).await?;
             return Ok(json!({"message":output}));
         }
-        idle(&mut core, &p)?;
+        if action != "listBackups" {
+            idle(&mut core, &p)?;
+        }
         match action {
             "deleteProfile" => {
                 let mut next = core.settings.clone();
@@ -618,7 +710,9 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
                 )
             }
             "install" => {
-                if app.steam_busy.load(Ordering::SeqCst) {
+                if app.steam_busy.load(Ordering::SeqCst)
+                    || core.operations.values().any(|v| v["running"] == true)
+                {
                     return Err("Attendre la fin du téléchargement SteamCMD.".into());
                 }
                 let detected = crate::steamcmd::status(&core.settings.steamcmd, &app.data);
@@ -635,7 +729,10 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
                 )
             }
             "confirmServerUpdate" => {
-                if app.steam_busy.load(Ordering::SeqCst) || core.manager.any_busy() {
+                if app.steam_busy.load(Ordering::SeqCst)
+                    || core.manager.any_busy()
+                    || core.operations.values().any(|v| v["running"] == true)
+                {
                     return Err("Une opération SteamCMD est déjà en cours.".into());
                 }
                 let checked = model::load::<Value>(&crate::versions::cache_path(&app.data, id))?;
@@ -699,6 +796,15 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
                     json!({"message":"Réglages enregistrés. Les autres paramètres sont conservés et les fichiers précédents ont été sauvegardés."}),
                 )
             }
+            "importTuning" => {
+                if input["preset"]["format"] != "ark-panel-tuning-v1" {
+                    return Err("Format de profil incompatible.".into());
+                }
+                crate::config::save(&p, &input["hashes"], &input["preset"]["values"])?;
+                Ok(
+                    json!({"message":"Profil de réglages importé. Les adresses, mots de passe et ports restent propres au serveur."}),
+                )
+            }
             "listBackups" => {
                 let dir = app.data.join("backups").join(id);
                 let mut items = vec![];
@@ -749,6 +855,198 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
         }
     }
 }
+async fn refresh_health(app: &Shared) {
+    let profiles = app.core.lock().await.settings.profiles.clone();
+    for p in profiles {
+        let (running, uptime) = {
+            let mut c = app.core.lock().await;
+            c.manager.discover(&p);
+            (
+                c.manager.running(&p.id),
+                c.manager
+                    .identities
+                    .get(&p.id)
+                    .map(|i| crate::now().saturating_sub(i.start))
+                    .unwrap_or(0),
+            )
+        };
+        let probe = if running {
+            match model::admin_password(&p) {
+                Ok(pass) => crate::rcon::command(p.rcon_port, &pass, "ListPlayers").await,
+                Err(e) => Err(e),
+            }
+        } else {
+            Err("Serveur arrêté".into())
+        };
+        let state = if !running {
+            "offline"
+        } else if probe.is_ok() {
+            "ready"
+        } else if uptime < 900 {
+            "starting"
+        } else {
+            "unreachable"
+        };
+        app.core.lock().await.health.insert(
+            p.id,
+            json!({"state":state,"checkedAt":crate::now(),"error":probe.err()}),
+        );
+    }
+}
+async fn wait_steam(app: &Shared, id: &str) -> Result<(), String> {
+    for _ in 0..7200 {
+        let job = app.core.lock().await.manager.job_status(id);
+        if job["running"] != true {
+            if job["kind"] == "check"
+                && job["success"] == true
+                && job["publicBuild"]["buildId"].is_string()
+            {
+                model::save(
+                    &crate::versions::cache_path(&app.data, id),
+                    &job["publicBuild"],
+                )?;
+            }
+            return if job["success"] == true {
+                Ok(())
+            } else {
+                Err(job["message"].as_str().unwrap_or("Échec SteamCMD").into())
+            };
+        }
+        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+    }
+    Err("Délai SteamCMD dépassé ; serveur conservé à l’arrêt.".into())
+}
+async fn maintenance(
+    app: &Shared,
+    p: &Profile,
+    s: &crate::schedule::Schedule,
+    backup: bool,
+    restart: bool,
+    update: bool,
+) -> Result<String, String> {
+    let mut changed = false;
+    if update {
+        {
+            let mut c = app.core.lock().await;
+            let steam = crate::steamcmd::status(&c.settings.steamcmd, &app.data)["path"]
+                .as_str()
+                .ok_or("SteamCMD introuvable")?
+                .to_string();
+            c.manager.steam_job(&p.id, "check", &steam, None, false)?;
+        }
+        wait_steam(app, &p.id).await?;
+        let latest: Value = model::load(&crate::versions::cache_path(&app.data, &p.id))?;
+        let installed = crate::versions::installed(Path::new(&p.directory));
+        if latest["buildId"].as_str().is_none() {
+            return Err("Build public non vérifié.".into());
+        }
+        changed = latest["buildId"] != installed["buildId"] || installed["complete"] != true;
+    }
+    if !backup && !restart && !changed {
+        return Ok("Vérification automatique : serveur à jour.".into());
+    }
+    let was_running = app.core.lock().await.manager.running(&p.id);
+    if was_running {
+        let password = model::admin_password(p)?;
+        for remaining in (1..=s.warning_minutes).rev() {
+            let message = s.message.replace("{minutes}", &remaining.to_string());
+            crate::rcon::command(p.rcon_port, &password, &format!("Broadcast {message}")).await?;
+            tokio::time::sleep(std::time::Duration::from_secs(60)).await;
+        }
+        crate::rcon::command(p.rcon_port, &password, "SaveWorld").await?;
+        crate::rcon::command(p.rcon_port, &password, "DoExit").await?;
+        let mut stopped = false;
+        for _ in 0..150 {
+            if !app.core.lock().await.manager.running(&p.id) {
+                stopped = true;
+                break;
+            }
+            tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+        }
+        if !stopped {
+            return Err("Arrêt non confirmé : maintenance annulée, aucun arrêt forcé.".into());
+        }
+    }
+    // Keep a verified copy before every scheduled update as well as requested backups.
+    let result:Result<(),String>=async {
+        if backup || changed {
+            let p=p.clone();let data=app.data.clone();
+            tokio::task::spawn_blocking(move||backup_operation(&p,&data,None)).await.map_err(|e|e.to_string())??;
+        }
+        if changed {
+            {
+                let mut c=app.core.lock().await;
+                let steam=crate::steamcmd::status(&c.settings.steamcmd,&app.data)["path"].as_str().ok_or("SteamCMD introuvable")?.to_string();
+                c.manager.steam_job(&p.id,"update",&steam,Some(Path::new(&p.directory)),false)?;
+            }
+            wait_steam(app,&p.id).await?;
+            let latest:Value=model::load(&crate::versions::cache_path(&app.data,&p.id))?;
+            let installed=crate::versions::installed(Path::new(&p.directory));
+            if installed["complete"]!=true || installed["buildId"]!=latest["buildId"] {
+                return Err("Le build installé ne correspond pas au build vérifié. Serveur conservé à l’arrêt.".into());
+            }
+        }
+        Ok(())
+    }.await;
+    // A failed update may leave incomplete binaries. Never restart those automatically.
+    if was_running && (result.is_ok() || !changed) {
+        app.core.lock().await.manager.start(p)?;
+    }
+    result?;
+    Ok("Maintenance terminée : sauvegarde / mise à jour vérifiée, serveur relancé s’il était actif.".into())
+}
+async fn schedule_tick(app: &Shared) -> Result<(), String> {
+    let profiles = app.core.lock().await.settings.profiles.clone();
+    for p in profiles {
+        let path = app.data.join(format!("schedule-{}.json", p.id));
+        let mut s: crate::schedule::Schedule = model::load(&path)?;
+        s.validate()?;
+        let (day, minute) = crate::schedule::local_clock();
+        let (backup, restart, update) = s.due(crate::now(), day, minute);
+        if !backup && !restart && !update {
+            continue;
+        }
+        {
+            let mut c = app.core.lock().await;
+            if app.update_busy.load(Ordering::SeqCst)
+                || app.steam_busy.load(Ordering::SeqCst)
+                || c.manager.any_busy()
+                || c.operations.values().any(|v| v["running"] == true)
+            {
+                continue;
+            }
+            model::validate_profile(&p, &c.settings.profiles, &app.data)?;
+            if backup {
+                s.last_backup = crate::now();
+            }
+            if restart {
+                s.last_restart_day = day;
+            }
+            if update {
+                s.last_update_day = day;
+            }
+            s.last_result = "Maintenance en cours".into();
+            model::save(&path, &s)?;
+            c.operations.insert(p.id.clone(),json!({"running":true,"message":"Maintenance programmée en cours (préavis inclus)"}));
+        }
+        let result = maintenance(app, &p, &s, backup, restart, update).await;
+        s.last_result = format!(
+            "{} : {}",
+            crate::now(),
+            result
+                .as_ref()
+                .map(|s| s.as_str())
+                .unwrap_or_else(|e| e.as_str())
+        );
+        let saved = model::save(&path, &s);
+        app.core.lock().await.operations.insert(
+            p.id.clone(),
+            json!({"running":false,"success":result.is_ok(),"message":s.last_result}),
+        );
+        saved?;
+    }
+    Ok(())
+}
 pub fn backup_operation(p: &Profile, data: &Path, restore: Option<&str>) -> Result<String, String> {
     let saved = Path::new(&p.directory).join("ShooterGame/Saved");
     let base = data.join("backups").join(&p.id);
@@ -797,6 +1095,118 @@ pub fn backup_operation(p: &Profile, data: &Path, restore: Option<&str>) -> Resu
 #[cfg(test)]
 mod http_tests {
     use super::*;
+    fn fixture() -> (Shared, Profile, PathBuf) {
+        let root = std::env::temp_dir().join(format!("ark-schedule-test-{}", uuid::Uuid::new_v4()));
+        let data = root.join("panel");
+        fs::create_dir_all(&data).unwrap();
+        let p = Profile {
+            id: uuid::Uuid::new_v4().to_string(),
+            name: "Test".into(),
+            directory: root.join("server").to_string_lossy().into(),
+            map: "TheIsland_WP".into(),
+            game_port: 17777,
+            rcon_port: 17778,
+            mods: String::new(),
+        };
+        let app = Arc::new(App {
+            core: Mutex::new(Core {
+                settings: Settings {
+                    profiles: vec![p.clone()],
+                    ..Default::default()
+                },
+                manager: Manager::new(data.clone()).unwrap(),
+                operations: HashMap::new(),
+                updates: UpdateStatus::default(),
+                steam_install: Value::Null,
+                health: HashMap::new(),
+            }),
+            data,
+            token: "test".into(),
+            host: "localhost".into(),
+            shutdown: Notify::new(),
+            update_busy: AtomicBool::new(false),
+            steam_busy: AtomicBool::new(false),
+            metrics: crate::metrics::empty(),
+        });
+        (app, p, root)
+    }
+    #[tokio::test]
+    async fn scheduled_backup_is_verified_and_not_repeated_after_reload() {
+        let (app, p, root) = fixture();
+        let saved = Path::new(&p.directory).join("ShooterGame/Saved");
+        fs::create_dir_all(&saved).unwrap();
+        fs::write(saved.join("world.ark"), b"world fixture").unwrap();
+        let path = app.data.join(format!("schedule-{}.json", p.id));
+        model::save(
+            &path,
+            &crate::schedule::Schedule {
+                backup_enabled: true,
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        schedule_tick(&app).await.unwrap();
+        let backups = app.data.join("backups").join(&p.id);
+        assert_eq!(fs::read_dir(&backups).unwrap().count(), 1);
+        let archive = fs::read_dir(&backups)
+            .unwrap()
+            .next()
+            .unwrap()
+            .unwrap()
+            .path();
+        assert!(archive.join("complete.json").is_file());
+        assert_eq!(
+            fs::read(archive.join("Saved/world.ark")).unwrap(),
+            b"world fixture"
+        );
+        schedule_tick(&app).await.unwrap();
+        assert_eq!(fs::read_dir(&backups).unwrap().count(), 1);
+        let s: crate::schedule::Schedule = model::load(&path).unwrap();
+        assert!(s.last_backup > 0);
+        assert!(
+            !app.core.lock().await.operations[&p.id]["running"]
+                .as_bool()
+                .unwrap()
+        );
+        fs::remove_dir_all(root).unwrap();
+    }
+    #[tokio::test]
+    async fn tuning_transfer_excludes_secrets_and_preserves_target_identity() {
+        let (app, p, root) = fixture();
+        let file = model::ini_path(&p, "GameUserSettings.ini").unwrap();
+        model::save_bytes(
+            &file,
+            b"[ServerSettings]\nServerAdminPassword=secret\nRCONPort=17778\nXPMultiplier=3\n",
+        )
+        .unwrap();
+        let exported = dispatch(app.clone(), json!({"action":"exportTuning","id":p.id}))
+            .await
+            .unwrap();
+        assert_eq!(exported["values"]["XPMultiplier"], 3.0);
+        assert!(!exported.to_string().contains("secret"));
+        let read = crate::config::read(&p).unwrap();
+        let mut preset = exported.clone();
+        preset["values"]["XPMultiplier"] = json!(5);
+        dispatch(
+            app.clone(),
+            json!({"action":"importTuning","id":p.id,"preset":preset,"hashes":read["hashes"]}),
+        )
+        .await
+        .unwrap();
+        let text = fs::read_to_string(&file).unwrap();
+        assert!(text.contains("XPMultiplier=5"));
+        assert!(text.contains("RCONPort=17778"));
+        assert!(text.contains("ServerAdminPassword=secret"));
+        assert!(
+            dispatch(
+                app,
+                json!({"action":"importTuning","id":p.id,"preset":exported,"hashes":read["hashes"]})
+            )
+            .await
+            .is_err()
+        );
+        fs::remove_dir_all(root).unwrap();
+    }
     #[tokio::test]
     async fn api_requires_key_and_rejects_cross_site_requests() {
         let data = std::env::temp_dir().join(format!("ark-http-{}", uuid::Uuid::new_v4()));
@@ -810,6 +1220,7 @@ mod http_tests {
                 operations: HashMap::new(),
                 updates: UpdateStatus::default(),
                 steam_install: Value::Null,
+                health: HashMap::new(),
             }),
             data: data.clone(),
             token: "test-key-only-not-real".into(),
