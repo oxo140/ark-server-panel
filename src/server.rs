@@ -438,15 +438,28 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
     } else {
         let mut core = app.core.lock().await;
         if action == "status" {
+            let connections = crate::connections::load(&app.data)?;
             let profiles = core.settings.profiles.clone();
             let mut rows = vec![];
             for p in profiles {
                 core.manager.discover(&p);
                 let running = core.manager.running(&p.id);
                 let job = core.manager.job_status(&p.id);
+                let progress = crate::progress::progress(
+                    &if job["running"] == true {
+                        crate::console::tail(
+                            &crate::manager::steam_log_path(&app.data, &p.id),
+                            64 * 1024,
+                        )
+                    } else {
+                        String::new()
+                    },
+                    &job,
+                );
+                let connection = connections.get(&p.id).cloned().unwrap_or_default();
                 let version = crate::versions::view(&app.data, &p, &job);
                 let operation = core.operations.get(&p.id).cloned();
-                rows.push(json!({"profile":p,"running":running,"job":job,"operation":operation,"serverVersion":version,"executablePresent":crate::manager::executable(&p).is_file()}));
+                rows.push(json!({"profile":p,"running":running,"job":job,"progress":progress,"connection":connection,"operation":operation,"serverVersion":version,"executablePresent":crate::manager::executable(&p).is_file()}));
             }
             return Ok(
                 json!({"version":updates::VERSION,"revision":updates::REVISION,"profiles":rows,"settings":{"repository":core.settings.repository,"branch":core.settings.branch,"steamcmd":core.settings.steamcmd},"updates":core.updates,"updateBusy":app.update_busy.load(Ordering::SeqCst),"steamInstalling":app.steam_busy.load(Ordering::SeqCst),"dataDirectory":app.data,"lastUpdate":model::load::<Value>(&app.data.join("last-update.json")).unwrap_or(Value::Null)}),
@@ -501,6 +514,28 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
         }
         let id = field(&input, "id")?;
         let p = profile(&core, id)?;
+        if action == "connectionInfo" || action == "setConnection" {
+            let mut connections = crate::connections::load(&app.data)?;
+            let mut entry = connections.get(id).cloned().unwrap_or_default();
+            if action == "setConnection" {
+                if let Some(host) = input["host"].as_str() {
+                    entry.host = crate::connections::valid_host(host)?;
+                }
+                if let Some(favorite) = input["favorite"].as_bool() {
+                    entry.favorite = favorite;
+                }
+                connections.insert(id.into(), entry.clone());
+                model::save(&app.data.join("connections.json"), &connections)?;
+            }
+            let address = if entry.host.is_empty() {
+                String::new()
+            } else {
+                crate::connections::endpoint(&entry.host, p.game_port)
+            };
+            return Ok(
+                json!({"connection":entry,"address":address,"gamePort":p.game_port,"candidates":if action=="connectionInfo"{crate::connections::candidates()}else{vec![]},"message":"Adresse et favori enregistrés."}),
+            );
+        }
         model::validate_profile(&p, &core.settings.profiles, &app.data)?;
         if action == "logs" {
             let text = core.manager.logs(&p)?;

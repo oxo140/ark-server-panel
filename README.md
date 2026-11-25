@@ -154,4 +154,13 @@ Une icône ARK apparaît près de l’horloge Windows (éventuellement dans les 
 
 Dans les paramètres, **Activer le démarrage automatique** ajoute un script appartenant au panneau dans le dossier Démarrage de l’utilisateur Windows. Il relance le panneau en arrière-plan à l’ouverture de session, avec les mêmes données, adresse et port, sans ouvrir le navigateur. Le bouton inverse retire cette entrée. Les serveurs ARK continuent à être lancés manuellement. Cette fonction utilise Windows Script Host et ne demande pas de droits administrateur.
 
-La vérification de version ASA ne télécharge pas les fichiers du serveur. La barre reste animée tant que Steam ne fournit pas de mesure ; elle affiche le build public à la fin. Pour une installation ou validation, le pourcentage provient des lignes de progression SteamCMD et concerne l’étape en cours. Les détails techniques sont repliés sous **Afficher les diagnostics détaillés**.
+La vérification de version ASA ne télécharge pas les fichiers du serveur. La barre reste animée tant que Steam ne fournit pas de mesure ; elle affiche le build public à la fin. Pour une installation ou validation, le pourcentage provient des lignes de progression SteamCMD et concerne l’étape en cours. Les détails techniques sont ouverts par défaut et restent repliables sous **Afficher les diagnostics détaillés**.
+
+
+## Rejoindre un serveur et favoris
+
+La carte du serveur affiche sa progression SteamCMD. **☆ Favori** conserve un favori dans le panneau ; les favoris passent en premier et un filtre est disponible dans Serveurs. Ces favoris ne sont pas écrits dans Steam ni dans le jeu.
+
+**Connexion directe / IP** propose les adresses de la machine hôte, notamment Tailscale si présent. Choisissez l’adresse accessible depuis le PC du joueur puis enregistrez-la. Le panneau ajoute le port de jeu du profil, jamais le port RCON. 127.0.0.1 désigne uniquement la machine sur laquelle tourne le jeu ; aucun service externe n’est interrogé pour deviner une IP publique.
+
+**Rejoindre** envoie au Steam du PC qui ouvre la page un lancement de l’application ASA 2399830 avec -ExecCmds="open IP:port". Cela s’appuie sur les arguments de console Unreal ; le lancement et l’adhésion automatique au serveur dépendent du client ASA et ne constituent pas une vérification de joignabilité. En secours, copiez open IP:port depuis le dialogue et collez-le dans la console ASA après activation de l’accès console dans le jeu. La connexion réelle, les mods et les serveurs protégés par mot de passe doivent être vérifiés en jeu.

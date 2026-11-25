@@ -1,5 +1,6 @@
 mod catalog;
 mod config;
+mod connections;
 mod console;
 mod manager;
 mod metrics;

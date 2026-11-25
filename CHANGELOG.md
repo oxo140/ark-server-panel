@@ -1,5 +1,13 @@
 # Modifications
 
+## 1.4.0 — 25 novembre 2026
+
+- Barre SteamCMD avec pourcentage réel directement dans les cartes de serveur, sans ouvrir le terminal.
+- Favoris dans le panneau, tri prioritaire et filtre des favoris dans la liste des serveurs.
+- Choix et mémorisation de l’adresse de connexion par serveur, détection des IP locales et Tailscale, utilisation du port de jeu.
+- Bouton Rejoindre via Steam avec demande de connexion ASA et commande open IP:port à copier en secours ; la connexion automatique dépend du client ASA et reste à valider en jeu.
+
+
 ## 1.3.2 — 25 novembre 2026
 
 - Diagnostics détaillés ouverts par défaut, toujours repliables, avec couleurs distinctes pour erreurs, avertissements, succès et activité.
