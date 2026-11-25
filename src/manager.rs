@@ -39,6 +39,7 @@ pub struct Manager {
     pub children: HashMap<String, Child>,
     pub jobs: HashMap<String, Child>,
     pub job_identities: HashMap<String, Identity>,
+    window_guards: HashMap<String, (u32, u64)>,
     pub data: PathBuf,
 }
 impl Manager {
@@ -48,11 +49,18 @@ impl Manager {
             children: HashMap::new(),
             jobs: HashMap::new(),
             job_identities: crate::model::load(&data.join("jobs.json"))?,
+            window_guards: HashMap::new(),
             data,
         })
     }
     pub fn persist(&self) -> Result<(), String> {
         crate::model::save(&self.data.join("processes.json"), &self.identities)
+    }
+    fn guard_windows(&mut self, id: &str, pid: u32, start: u64) {
+        if self.window_guards.get(id) != Some(&(pid, start)) {
+            self.window_guards.insert(id.into(), (pid, start));
+            crate::window_guard::hide_server_windows(pid, start);
+        }
     }
     pub fn discover(&mut self, p: &Profile) {
         let exe = executable(p);
@@ -62,6 +70,7 @@ impl Manager {
                 .exe()
                 .is_some_and(|e| normalized_executable(e) == normalized_executable(&exe))
         }) {
+            self.guard_windows(&p.id, pid.as_u32(), process.start_time());
             self.identities.insert(
                 p.id.clone(),
                 Identity {
@@ -197,6 +206,7 @@ impl Manager {
                 executable: normalized_executable(&exe),
             },
         );
+        self.guard_windows(&p.id, pid, start);
         self.children.insert(p.id.clone(), child);
         self.persist()
     }
@@ -234,8 +244,17 @@ impl Manager {
         directory: Option<&Path>,
         visible: bool,
     ) -> Result<(), String> {
-        if self.any_busy() {
-            return Err("Une opération SteamCMD est déjà en cours. Attendez sa fin.".into());
+        if id.is_empty()
+            || !id
+                .bytes()
+                .all(|c| c.is_ascii_alphanumeric() || b"-_".contains(&c))
+        {
+            return Err("Identifiant de tâche SteamCMD invalide.".into());
+        }
+        if self.busy(id) || self.busy("_steamcmd") || (id == "_steamcmd" && self.any_busy()) {
+            return Err(
+                "SteamCMD travaille déjà sur ce serveur, ou son installation est en cours.".into(),
+            );
         }
         fs::create_dir_all(self.data.join("logs")).map_err(|e| e.to_string())?;
         let spec = crate::console::JobSpec {
@@ -246,6 +265,11 @@ impl Manager {
             log: steam_log_path(&self.data, id),
             result: self.data.join(format!("job-{id}.json")),
             visible,
+            runtime: if id == "_steamcmd" {
+                None
+            } else {
+                Some(self.data.join("steamcmd-workers").join(id))
+            },
         };
         let child = crate::console::launch(&spec, &self.data.join(format!("job-spec-{id}.json")))?;
         let pid = child.id();

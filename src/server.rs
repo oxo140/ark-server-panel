@@ -463,6 +463,12 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
             for p in profiles {
                 core.manager.discover(&p);
                 let running = core.manager.running(&p.id);
+                let resources = core.manager.identities.get(&p.id).and_then(|identity| {
+                    let metrics = app.metrics.read().ok()?;
+                    let entry = &metrics["processes"][identity.pid.to_string()];
+                    (running && entry["startTime"].as_u64() == Some(identity.start))
+                        .then(|| entry.clone())
+                });
                 let job = core.manager.job_status(&p.id);
                 let progress = crate::progress::progress(
                     &if job["running"] == true {
@@ -479,7 +485,7 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
                 let version = crate::versions::view(&app.data, &p, &job);
                 let operation = core.operations.get(&p.id).cloned();
                 let health = core.health.get(&p.id).cloned().unwrap_or(Value::Null);
-                rows.push(json!({"profile":p,"running":running,"health":health,"job":job,"progress":progress,"connection":connection,"operation":operation,"serverVersion":version,"executablePresent":crate::manager::executable(&p).is_file()}));
+                rows.push(json!({"profile":p,"running":running,"resources":resources,"health":health,"job":job,"progress":progress,"connection":connection,"operation":operation,"serverVersion":version,"executablePresent":crate::manager::executable(&p).is_file()}));
             }
             return Ok(
                 json!({"version":updates::VERSION,"revision":updates::REVISION,"profiles":rows,"settings":{"repository":core.settings.repository,"branch":core.settings.branch,"steamcmd":core.settings.steamcmd},"updates":core.updates,"updateBusy":app.update_busy.load(Ordering::SeqCst),"steamInstalling":app.steam_busy.load(Ordering::SeqCst),"dataDirectory":app.data,"lastUpdate":model::load::<Value>(&app.data.join("last-update.json")).unwrap_or(Value::Null)}),
@@ -652,8 +658,11 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
         }
         if action == "checkServerVersion" {
             if app.steam_busy.load(Ordering::SeqCst)
-                || core.manager.any_busy()
-                || core.operations.values().any(|v| v["running"] == true)
+                || core.manager.busy(id)
+                || core
+                    .operations
+                    .get(id)
+                    .is_some_and(|v| v["running"] == true)
             {
                 return Err("Attendre la fin de l’opération SteamCMD en cours.".into());
             }
@@ -711,7 +720,10 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
             }
             "install" => {
                 if app.steam_busy.load(Ordering::SeqCst)
-                    || core.operations.values().any(|v| v["running"] == true)
+                    || core
+                        .operations
+                        .get(id)
+                        .is_some_and(|v| v["running"] == true)
                 {
                     return Err("Attendre la fin du téléchargement SteamCMD.".into());
                 }
@@ -730,8 +742,11 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
             }
             "confirmServerUpdate" => {
                 if app.steam_busy.load(Ordering::SeqCst)
-                    || core.manager.any_busy()
-                    || core.operations.values().any(|v| v["running"] == true)
+                    || core.manager.busy(id)
+                    || core
+                        .operations
+                        .get(id)
+                        .is_some_and(|v| v["running"] == true)
                 {
                     return Err("Une opération SteamCMD est déjà en cours.".into());
                 }
@@ -1010,8 +1025,10 @@ async fn schedule_tick(app: &Shared) -> Result<(), String> {
             let mut c = app.core.lock().await;
             if app.update_busy.load(Ordering::SeqCst)
                 || app.steam_busy.load(Ordering::SeqCst)
-                || c.manager.any_busy()
-                || c.operations.values().any(|v| v["running"] == true)
+                || c.manager.busy(&p.id)
+                || c.operations
+                    .get(&p.id)
+                    .is_some_and(|v| v["running"] == true)
             {
                 continue;
             }

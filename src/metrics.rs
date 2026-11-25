@@ -47,6 +47,14 @@ pub fn start(data: PathBuf) -> Metrics {
             previous = Instant::now();
             system.refresh_cpu_usage();
             system.refresh_memory();
+            system.refresh_processes_specifics(
+                sysinfo::ProcessesToUpdate::All,
+                true,
+                sysinfo::ProcessRefreshKind::nothing()
+                    .with_cpu()
+                    .with_memory()
+                    .with_disk_usage(),
+            );
             networks.refresh(true);
             disks.refresh(true);
             let interfaces:Vec<_>=networks.iter().map(|(name,data)|json!({"name":name,"receivedBytesPerSec":rate(data.received(),seconds),"transmittedBytesPerSec":rate(data.transmitted(),seconds)})).collect();
@@ -63,7 +71,8 @@ pub fn start(data: PathBuf) -> Metrics {
                 persistence_error = crate::model::save(&file, &history).err();
                 persisted = Instant::now();
             }
-            let value = json!({"ready":true,"sampledAt":at,"intervalSeconds":seconds,"host":System::host_name(),"cpuPercent":system.global_cpu_usage(),"cpuName":system.cpus().first().map(|c|c.brand()),"logicalCpus":system.cpus().len(),"memory":{"usedBytes":system.used_memory(),"totalBytes":system.total_memory()},"disks":disk_rows,"interfaces":interfaces,"history":history,"historyWindowSeconds":600,"historyPersistenceError":persistence_error});
+            let processes:serde_json::Map<String,Value>=system.processes().iter().filter(|(_,p)|p.name().eq_ignore_ascii_case("ArkAscendedServer.exe")).map(|(pid,p)|{let io=p.disk_usage();(pid.as_u32().to_string(),json!({"pid":pid.as_u32(),"startTime":p.start_time(),"sampledAt":at,"cpuPercent":p.cpu_usage()/system.cpus().len().max(1) as f32,"memoryBytes":p.memory(),"ioReadBytesPerSec":rate(io.read_bytes,seconds),"ioWrittenBytesPerSec":rate(io.written_bytes,seconds),"networkAvailable":false}))}).collect();
+            let value = json!({"ready":true,"sampledAt":at,"intervalSeconds":seconds,"host":System::host_name(),"cpuPercent":system.global_cpu_usage(),"cpuName":system.cpus().first().map(|c|c.brand()),"logicalCpus":system.cpus().len(),"memory":{"usedBytes":system.used_memory(),"totalBytes":system.total_memory()},"disks":disk_rows,"interfaces":interfaces,"processes":processes,"history":history,"historyWindowSeconds":600,"historyPersistenceError":persistence_error});
             if let Ok(mut target) = output.write() {
                 *target = value;
             }

@@ -1,5 +1,14 @@
 # Modifications
 
+## 1.7.0 — 25 novembre 2026
+
+- Lancement, vérification ASA, installation et confirmation de mise à jour restent dans la carte ; les statistiques s’ouvrent uniquement sur demande.
+- Masquage ciblé en Rust des fenêtres créées par le processus ARK, y compris après récupération d’un serveur déjà lancé ; aucun déplacement vers un autre bureau Windows.
+- Instances SteamCMD isolées par profil, avec caches et dossiers de travail distincts, permettant plusieurs tâches simultanées sur des serveurs différents.
+- Maintien de l’exclusion des opérations concurrentes sur un même serveur et du blocage de la mise à jour du panneau pendant les tâches.
+- CPU, RAM et débits d’E/S propres à chaque processus ARK dans sa carte ; CPU normalisé à la puissance totale de la machine. Réseau global conservé en haut, sans lui attribuer un faux débit par serveur.
+
+
 ## 1.6.0 — 25 novembre 2026
 
 - Cartes compactes sur trois colonnes sur grand écran, deux sur écran intermédiaire et une sur mobile ; palette conservée.

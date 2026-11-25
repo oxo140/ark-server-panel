@@ -10,6 +10,8 @@ use std::{
 };
 #[derive(Clone, Serialize, Deserialize)]
 pub struct JobSpec {
+    #[serde(default)]
+    pub runtime: Option<PathBuf>,
     pub run_id: String,
     pub kind: String,
     pub steamcmd: PathBuf,
@@ -182,6 +184,11 @@ fn execute_job(spec: &JobSpec) -> Result<Value, String> {
     if !crate::steamcmd::valid_executable(&spec.steamcmd) {
         return Err("SteamCMD est introuvable ou invalide.".into());
     }
+    let steamcmd = if let Some(runtime) = &spec.runtime {
+        crate::steamcmd::isolated_runtime(&spec.steamcmd, runtime)?
+    } else {
+        spec.steamcmd.clone()
+    };
     let args = args(&spec.kind, spec.directory.as_deref())?;
     fs::create_dir_all(spec.log.parent().ok_or("Dossier de journal manquant")?)
         .map_err(|e| e.to_string())?;
@@ -194,7 +201,7 @@ fn execute_job(spec: &JobSpec) -> Result<Value, String> {
     let header = format!(
         "ARK Server Panel — SteamCMD {}\nProgramme : {}\nArguments : {}\n\n",
         spec.kind,
-        spec.steamcmd.display(),
+        steamcmd.display(),
         args.join(" ")
     );
     let _ = output.write_all(header.as_bytes());
@@ -205,10 +212,10 @@ fn execute_job(spec: &JobSpec) -> Result<Value, String> {
     let mut configuration_retry = false;
     let status = loop {
         let attempt_start = fs::metadata(&spec.log).map(|m| m.len()).unwrap_or(0);
-        let mut command = Command::new(&spec.steamcmd);
+        let mut command = Command::new(&steamcmd);
         command
             .args(&args)
-            .current_dir(spec.steamcmd.parent().unwrap())
+            .current_dir(steamcmd.parent().unwrap())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .stdin(Stdio::null());

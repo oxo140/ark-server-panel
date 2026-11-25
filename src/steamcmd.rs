@@ -6,6 +6,66 @@ use std::{
 };
 
 pub const URL: &str = "https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip";
+pub fn isolated_runtime(source: &Path, directory: &Path) -> Result<PathBuf, String> {
+    validate_directory(directory)?;
+    let target = directory.join("steamcmd.exe");
+    let marker = directory.join("panel-source.txt");
+    let identity = source
+        .canonicalize()
+        .map_err(|e| e.to_string())?
+        .to_string_lossy()
+        .into_owned();
+    if valid_executable(&target) && fs::read_to_string(&marker).ok().as_deref() == Some(&identity) {
+        return Ok(target);
+    }
+    fs::create_dir_all(directory).map_err(|e| e.to_string())?;
+    fs::copy(source, &target).map_err(|e| e.to_string())?;
+    let parent = source.parent().ok_or("Dossier SteamCMD manquant")?;
+    // Each profile gets private caches, locks and working files. Never copy steamapps or userdata.
+    for name in [
+        "steam.dll",
+        "steamclient.dll",
+        "steamclient64.dll",
+        "steamconsole.dll",
+        "steamconsole64.dll",
+        "tier0_s.dll",
+        "tier0_s64.dll",
+        "vstdlib_s.dll",
+        "vstdlib_s64.dll",
+        "crashhandler.dll",
+        "crashhandler64.dll",
+    ] {
+        let file = parent.join(name);
+        if file.is_file() {
+            crate::manager::copy_tree(&file, &directory.join(name))?;
+        }
+    }
+    for name in ["bin", "public"] {
+        let folder = parent.join(name);
+        if folder.is_dir() {
+            crate::manager::copy_tree(&folder, &directory.join(name))?;
+        }
+    }
+    let package = parent.join("package");
+    if package.is_dir() {
+        fs::create_dir_all(directory.join("package")).map_err(|e| e.to_string())?;
+        for file in fs::read_dir(package).map_err(|e| e.to_string())? {
+            let file = file.map_err(|e| e.to_string())?;
+            if file
+                .path()
+                .extension()
+                .is_some_and(|x| x == "installed" || x == "manifest")
+            {
+                crate::manager::copy_tree(
+                    &file.path(),
+                    &directory.join("package").join(file.file_name()),
+                )?;
+            }
+        }
+    }
+    fs::write(marker, identity).map_err(|e| e.to_string())?;
+    Ok(target)
+}
 pub fn valid_executable(path: &Path) -> bool {
     if !path.is_absolute()
         || !path
@@ -185,6 +245,41 @@ pub fn pick_directory(initial: &str) -> Result<Option<PathBuf>, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn profile_runtimes_do_not_share_caches_or_copy_game_data() {
+        let root = std::env::temp_dir().join(format!("steam-isolation-{}", uuid::Uuid::new_v4()));
+        let source = managed_path(&root);
+        fs::create_dir_all(source.parent().unwrap()).unwrap();
+        let mut pe = vec![0u8; 128];
+        pe[..2].copy_from_slice(b"MZ");
+        pe[60..64].copy_from_slice(&64u32.to_le_bytes());
+        pe[64..68].copy_from_slice(b"PE\0\0");
+        fs::write(&source, &pe).unwrap();
+        for folder in ["steamapps", "userdata", "appcache"] {
+            fs::create_dir_all(source.parent().unwrap().join(folder)).unwrap();
+            fs::write(
+                source.parent().unwrap().join(folder).join("private"),
+                b"do not copy",
+            )
+            .unwrap();
+        }
+        let first = root.join("first");
+        let second = root.join("second");
+        assert_ne!(
+            isolated_runtime(&source, &first).unwrap(),
+            isolated_runtime(&source, &second).unwrap()
+        );
+        for folder in ["steamapps", "userdata", "appcache"] {
+            assert!(!first.join(folder).exists());
+            assert!(!second.join(folder).exists());
+        }
+        fs::create_dir(first.join("appcache")).unwrap();
+        fs::write(first.join("appcache/test"), b"one").unwrap();
+        isolated_runtime(&source, &first).unwrap();
+        assert!(first.join("appcache/test").exists());
+        assert!(!second.join("appcache/test").exists());
+        fs::remove_dir_all(root).unwrap();
+    }
     #[test]
     fn managed_install_is_found_when_the_configured_path_is_invalid() {
         let root = std::env::temp_dir().join(format!("steamcmd-fixture-{}", uuid::Uuid::new_v4()));

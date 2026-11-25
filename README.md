@@ -190,3 +190,12 @@ La carte du serveur affiche sa progression SteamCMD. **☆ Favori** conserve un 
 **Connexion directe / IP** propose les adresses de la machine hôte, notamment Tailscale si présent. Choisissez l’adresse accessible depuis le PC du joueur puis enregistrez-la. Le panneau ajoute le port de jeu du profil, jamais le port RCON. 127.0.0.1 désigne uniquement la machine sur laquelle tourne le jeu ; aucun service externe n’est interrogé pour deviner une IP publique.
 
 **Rejoindre** envoie au Steam du PC qui ouvre la page un lancement de l’application ASA 2399830 avec -ExecCmds="open IP:port". Cela s’appuie sur les arguments de console Unreal ; le lancement et l’adhésion automatique au serveur dépendent du client ASA et ne constituent pas une vérification de joignabilité. En secours, copiez open IP:port depuis le dialogue et collez-le dans la console ASA après activation de l’accès console dans le jeu. La connexion réelle, les mods et les serveurs protégés par mot de passe doivent être vérifiés en jeu.
+
+
+## Mesures par serveur et SteamCMD parallèle
+
+Les cartes des serveurs actifs affichent le CPU (part de la puissance totale de l’hôte), la RAM et les débits d’entrées/sorties de leur processus, relevés toutes les deux secondes et associés au PID et à son heure de création. Sous Windows, les compteurs d’E/S ne sont pas une mesure exclusive du disque physique. Le réseau reste mesuré globalement en haut de la page.
+
+Chaque profil utilise sa propre instance dans `steamcmd-workers`, avec caches et fichiers de travail séparés. Les composants de SteamCMD peuvent se mettre à jour au premier lancement de chaque instance. Les données Steam personnelles et les dossiers `steamapps` ne sont pas dupliqués. Une seule opération peut modifier un serveur à la fois ; plusieurs profils distincts peuvent travailler en parallèle.
+
+Les boutons Lancer, Vérifier ASA et Confirmer la mise à jour ne déclenchent plus l’ouverture des statistiques. Un surveillant Rust masque les fenêtres appartenant au processus ARK identifié par le panneau, sans fermer le serveur ni déplacer les fenêtres des autres applications.
