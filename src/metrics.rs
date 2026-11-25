@@ -32,7 +32,9 @@ pub fn start(data: PathBuf) -> Metrics {
     let state = empty();
     let output = state.clone();
     std::thread::spawn(move || {
-        let mut system = System::new_all();
+        let mut system = System::new();
+        system.refresh_cpu_all();
+        system.refresh_memory();
         let mut networks = Networks::new_with_refreshed_list();
         let mut disks = Disks::new_with_refreshed_list();
         let mut previous = Instant::now();
@@ -50,6 +52,17 @@ pub fn start(data: PathBuf) -> Metrics {
             system.refresh_processes_specifics(
                 sysinfo::ProcessesToUpdate::All,
                 true,
+                sysinfo::ProcessRefreshKind::nothing(),
+            );
+            let ark_pids: Vec<_> = system
+                .processes()
+                .iter()
+                .filter(|(_, p)| p.name().eq_ignore_ascii_case("ArkAscendedServer.exe"))
+                .map(|(pid, _)| *pid)
+                .collect();
+            system.refresh_processes_specifics(
+                sysinfo::ProcessesToUpdate::Some(&ark_pids),
+                false,
                 sysinfo::ProcessRefreshKind::nothing()
                     .with_cpu()
                     .with_memory()

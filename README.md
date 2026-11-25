@@ -1,5 +1,11 @@
 # ARK Server Panel
 
+### Correctif 1.7.1
+
+La collecte des performances évite désormais les informations complètes de tous les processus : seuls les processus ARK sont mesurés en détail, et les contrôles d’identité ciblent le PID concerné. Le nombre de threads du panneau est limité. Avant un lancement, Windows doit disposer d’au moins 8 Gio de mémoire virtuelle disponible (marge minimale ; cartes et mods peuvent demander davantage). Sinon, le panneau affiche une erreur au lieu de lancer un serveur supplémentaire. Un épuisement global de la mémoire virtuelle Windows peut toujours fermer des applications : libérez de la mémoire ou augmentez le fichier d’échange Windows si nécessaire.
+
+Le bouton **Stats du serveur** ouvre directement **Configuration INI**. Les statistiques restent accessibles dans leur onglet.
+
 Panneau web indépendant pour gérer des serveurs **ARK: Survival Ascended sur Windows**. Le service, les opérations système, RCON, les sauvegardes et les mises à jour sont écrits en **Rust**. L’interface HTML/CSS/JavaScript est intégrée au binaire : aucun serveur Node.js, Python ou outil de compilation n’est nécessaire sur une installation utilisateur.
 
 ## Installer la V1

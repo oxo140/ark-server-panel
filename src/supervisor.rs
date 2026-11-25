@@ -131,6 +131,12 @@ pub async fn supervise() -> Result<(), String> {
             .await
             .map_err(|e| e.to_string())?
             .map_err(|e| e.to_string())?;
+        if !status.success() && status.code() != Some(75) {
+            return Err(format!(
+                "Le panneau s’est arrêté anormalement ({status}). Consulter {}. En cas d’échec d’allocation mémoire, vérifier la mémoire virtuelle Windows.",
+                dir.join("panel.log").display()
+            ));
+        }
         if status.code() != Some(75) {
             return Ok(());
         }

@@ -46,6 +46,8 @@ fn main() {
     }
     // Console workers only need synchronous I/O; do not create a web runtime for each job.
     let result = tokio::runtime::Builder::new_multi_thread()
+        .worker_threads(2)
+        .max_blocking_threads(8)
         .enable_all()
         .build()
         .map_err(|e| e.to_string())

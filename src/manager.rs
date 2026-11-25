@@ -9,6 +9,22 @@ use std::{
 };
 use sysinfo::{Pid, System};
 
+// Avoid reading every process environment, command line and memory on each status poll.
+pub fn process_snapshot(pid: Option<u32>) -> System {
+    let mut system = System::new();
+    let pids = pid.map(|id| [Pid::from_u32(id)]);
+    let selection = match &pids {
+        Some(ids) => sysinfo::ProcessesToUpdate::Some(ids),
+        None => sysinfo::ProcessesToUpdate::All,
+    };
+    system.refresh_processes_specifics(
+        selection,
+        true,
+        sysinfo::ProcessRefreshKind::nothing().with_exe(sysinfo::UpdateKind::OnlyIfNotSet),
+    );
+    system
+}
+
 pub fn hidden(command: &mut Command) -> &mut Command {
     #[cfg(windows)]
     {
@@ -64,7 +80,7 @@ impl Manager {
     }
     pub fn discover(&mut self, p: &Profile) {
         let exe = executable(p);
-        let system = System::new_all();
+        let system = process_snapshot(None);
         if let Some((pid, process)) = system.processes().iter().find(|(_, process)| {
             process
                 .exe()
@@ -94,7 +110,7 @@ impl Manager {
         let Some(identity) = self.identities.get(id) else {
             return false;
         };
-        let system = System::new_all();
+        let system = process_snapshot(Some(identity.pid));
         system
             .process(Pid::from_u32(identity.pid))
             .map(|p| {
@@ -139,7 +155,7 @@ impl Manager {
         } else {
             if stored["running"] == true {
                 let alive = self.job_identities.get(id).is_some_and(|identity| {
-                    let system = System::new_all();
+                    let system = process_snapshot(Some(identity.pid));
                     system
                         .process(Pid::from_u32(identity.pid))
                         .is_some_and(|p| {
@@ -170,6 +186,7 @@ impl Manager {
                 "ArkAscendedServer.exe introuvable. Installer le serveur avec SteamCMD.".into(),
             );
         }
+        check_launch_memory()?;
         let log = self.log_file(&p.id)?;
         let mut cmd = Command::new(&exe);
         cmd.current_dir(exe.parent().unwrap())
@@ -193,7 +210,7 @@ impl Manager {
             .spawn()
             .map_err(|e| e.to_string())?;
         let pid = child.id();
-        let system = System::new_all();
+        let system = process_snapshot(Some(pid));
         let start = system
             .process(Pid::from_u32(pid))
             .map(|p| p.start_time())
@@ -273,7 +290,7 @@ impl Manager {
         };
         let child = crate::console::launch(&spec, &self.data.join(format!("job-spec-{id}.json")))?;
         let pid = child.id();
-        let system = System::new_all();
+        let system = process_snapshot(Some(pid));
         let start = system
             .process(Pid::from_u32(pid))
             .map(|p| p.start_time())
@@ -327,6 +344,41 @@ impl Manager {
             .cloned()
             .collect();
         ids.iter().any(|id| self.busy(id))
+    }
+}
+// Available page file means remaining system commit on Windows, including RAM.
+// ARK can require considerably more during map loading: this is a minimum guard,
+// not a promise that every map/mod combination will fit.
+fn check_launch_memory() -> Result<(), String> {
+    #[cfg(windows)]
+    unsafe {
+        use windows_sys::Win32::System::SystemInformation::{GlobalMemoryStatusEx, MEMORYSTATUSEX};
+        let mut memory = MEMORYSTATUSEX {
+            dwLength: std::mem::size_of::<MEMORYSTATUSEX>() as u32,
+            ..std::mem::zeroed()
+        };
+        if GlobalMemoryStatusEx(&mut memory) != 0 {
+            validate_launch_memory(memory.ullAvailPageFile)?;
+        }
+    }
+    Ok(())
+}
+fn validate_launch_memory(available: u64) -> Result<(), String> {
+    const MINIMUM: u64 = 8 * 1024 * 1024 * 1024;
+    if available < MINIMUM {
+        return Err(format!(
+            "Mémoire virtuelle disponible insuffisante ({:.1} Gio). Au moins 8 Gio de marge sont requis avant de lancer ARK ; certaines cartes et mods demandent davantage. Fermez des applications ou augmentez le fichier d’échange Windows pour éviter la fermeture des serveurs et du panneau.",
+            available as f64 / (1024. * 1024. * 1024.)
+        ));
+    }
+    Ok(())
+}
+#[cfg(test)]
+mod memory_tests {
+    #[test]
+    fn insufficient_commit_prevents_another_server_launch() {
+        assert!(super::validate_launch_memory(1024 * 1024 * 1024).is_err());
+        assert!(super::validate_launch_memory(8 * 1024 * 1024 * 1024).is_ok());
     }
 }
 pub fn steam_log_path(data: &Path, id: &str) -> PathBuf {

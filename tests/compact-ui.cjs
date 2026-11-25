@@ -32,7 +32,9 @@ async function settle() { for(let i=0;i<8;i++) await new Promise(r=>setImmediate
     assert.ok(d.querySelector('#dashboard-servers [data-action=join][data-id=two]').disabled);
     assert.equal(d.querySelector('#dashboard-servers [data-action=detail]').textContent,'Stats du serveur');
     d.querySelector('#dashboard-servers [data-action=detail]').click(); await settle();
-    assert.ok(!d.querySelector('#tab-stats').hidden);
+    assert.ok(!d.querySelector('#tab-config').hidden);
+    assert.ok(calls.some(c=>c.action==='readTuning'));
+    d.querySelector('[data-tab=stats]').click(); await settle();
     assert.ok(d.querySelector('#server-stats').textContent.includes('123'));
     d.querySelector('[data-tab=schedule]').click(); await settle();
     assert.ok(d.querySelector('#schedule-form').elements.backupEnabled.checked);

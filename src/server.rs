@@ -599,7 +599,14 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
         }
         if action == "serverStats" {
             core.manager.discover(&p);
-            let system = sysinfo::System::new_all();
+            let mut system = sysinfo::System::new();
+            if let Some(identity) = core.manager.identities.get(id) {
+                system.refresh_processes_specifics(
+                    sysinfo::ProcessesToUpdate::Some(&[sysinfo::Pid::from_u32(identity.pid)]),
+                    true,
+                    sysinfo::ProcessRefreshKind::nothing().with_memory(),
+                );
+            }
             let process = core.manager.identities.get(id).and_then(|i| {
                 system
                     .process(sysinfo::Pid::from_u32(i.pid))
