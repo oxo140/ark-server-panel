@@ -426,15 +426,25 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
             core.settings.repository.clone()
         };
         let result = updates::prepare(&repo, &app.data).await;
-        app.update_busy.store(false, Ordering::SeqCst);
         match result {
             Ok(_) => {
                 app.core.lock().await.updates.pending = true;
+                // Keep mutations locked until the supervised restart. The response is
+                // delivered before shutting down HTTP; ARK processes are left running.
+                app.update_busy.store(true, Ordering::SeqCst);
+                let restarting = app.clone();
+                tokio::spawn(async move {
+                    tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+                    restarting.shutdown.notify_one();
+                });
                 Ok(
-                    json!({"message":"Version téléchargée et vérifiée. Cliquez sur Redémarrer le panneau."}),
+                    json!({"message":"Version téléchargée et vérifiée. Redémarrage automatique du panneau ; les serveurs ARK restent actifs.","restarting":true}),
                 )
             }
-            Err(e) => Err(e),
+            Err(e) => {
+                app.update_busy.store(false, Ordering::SeqCst);
+                Err(e)
+            }
         }
     } else if action == "restartPanel" {
         let mut core = app.core.lock().await;

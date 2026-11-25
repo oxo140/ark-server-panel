@@ -1,5 +1,13 @@
 # ARK Server Panel
 
+### Correctif 1.7.2
+
+Lost Colony requiert désormais une marge minimale de 16 Gio de mémoire virtuelle disponible au lancement, contre 8 Gio pour les autres cartes. Ce contrôle couvre mieux le pic de chargement observé ; il ne garantit pas la capacité de toutes les configurations et mods.
+
+Après téléchargement et vérification d’une mise à jour du panneau, le superviseur redémarre automatiquement le panneau. Les processus ARK restent actifs ; il n’est plus nécessaire de cliquer une seconde fois sur Redémarrer. En cas d’échec de téléchargement ou de vérification, aucun redémarrage n’est déclenché. Une mise à jour du panneau ne redémarre pas Windows.
+
+Lorsqu’un processus ARK lancé par le panneau s’arrête, son code de sortie et l’heure sont ajoutés aux diagnostics. Le panneau n’envoie aucun arrêt lorsque le serveur devient prêt. Si Windows épuise sa mémoire virtuelle, un changement de code ne peut pas maintenir le jeu en fonctionnement : vérifiez le fichier d’échange Windows.
+
 ### Correctif 1.7.1
 
 La collecte des performances évite désormais les informations complètes de tous les processus : seuls les processus ARK sont mesurés en détail, et les contrôles d’identité ciblent le PID concerné. Le nombre de threads du panneau est limité. Avant un lancement, Windows doit disposer d’au moins 8 Gio de mémoire virtuelle disponible (marge minimale ; cartes et mods peuvent demander davantage). Sinon, le panneau affiche une erreur au lieu de lancer un serveur supplémentaire. Un épuisement global de la mémoire virtuelle Windows peut toujours fermer des applications : libérez de la mémoire ou augmentez le fichier d’échange Windows si nécessaire.

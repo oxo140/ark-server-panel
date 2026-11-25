@@ -101,7 +101,15 @@ impl Manager {
         if let Some(child) = self.children.get_mut(id) {
             match child.try_wait() {
                 Ok(None) => return true,
-                Ok(Some(_)) => {
+                Ok(Some(status)) => {
+                    if let Ok(mut log) = self.log_file(id) {
+                        use std::io::Write;
+                        let _ = writeln!(
+                            log,
+                            "\n[ARK Panel {}] Processus ARK terminé : {status}. Aucun arrêt automatique n’est envoyé lorsque le serveur devient prêt. En cas d’arrêt inattendu, consulter les événements Windows et la mémoire virtuelle.",
+                            crate::now()
+                        );
+                    }
                     self.children.remove(id);
                 }
                 Err(_) => return true,
@@ -186,7 +194,7 @@ impl Manager {
                 "ArkAscendedServer.exe introuvable. Installer le serveur avec SteamCMD.".into(),
             );
         }
-        check_launch_memory()?;
+        check_launch_memory(&p.map)?;
         let log = self.log_file(&p.id)?;
         let mut cmd = Command::new(&exe);
         cmd.current_dir(exe.parent().unwrap())
@@ -349,7 +357,7 @@ impl Manager {
 // Available page file means remaining system commit on Windows, including RAM.
 // ARK can require considerably more during map loading: this is a minimum guard,
 // not a promise that every map/mod combination will fit.
-fn check_launch_memory() -> Result<(), String> {
+fn check_launch_memory(map: &str) -> Result<(), String> {
     #[cfg(windows)]
     unsafe {
         use windows_sys::Win32::System::SystemInformation::{GlobalMemoryStatusEx, MEMORYSTATUSEX};
@@ -358,16 +366,21 @@ fn check_launch_memory() -> Result<(), String> {
             ..std::mem::zeroed()
         };
         if GlobalMemoryStatusEx(&mut memory) != 0 {
-            validate_launch_memory(memory.ullAvailPageFile)?;
+            validate_launch_memory(memory.ullAvailPageFile, map)?;
         }
     }
     Ok(())
 }
-fn validate_launch_memory(available: u64) -> Result<(), String> {
-    const MINIMUM: u64 = 8 * 1024 * 1024 * 1024;
-    if available < MINIMUM {
+fn validate_launch_memory(available: u64, map: &str) -> Result<(), String> {
+    // Lost Colony exceeded 13 GiB of commit in the reported startup.
+    let minimum_gib = if map.eq_ignore_ascii_case("LostColony_WP") {
+        16
+    } else {
+        8
+    };
+    if available < minimum_gib * 1024 * 1024 * 1024 {
         return Err(format!(
-            "Mémoire virtuelle disponible insuffisante ({:.1} Gio). Au moins 8 Gio de marge sont requis avant de lancer ARK ; certaines cartes et mods demandent davantage. Fermez des applications ou augmentez le fichier d’échange Windows pour éviter la fermeture des serveurs et du panneau.",
+            "Mémoire virtuelle disponible insuffisante ({:.1} Gio). Au moins {minimum_gib} Gio de marge sont requis avant de lancer cette carte ; certaines cartes et mods demandent davantage. Fermez des applications ou activez/augmentez le fichier d’échange Windows pour éviter la fermeture des serveurs et du panneau.",
             available as f64 / (1024. * 1024. * 1024.)
         ));
     }
@@ -376,9 +389,14 @@ fn validate_launch_memory(available: u64) -> Result<(), String> {
 #[cfg(test)]
 mod memory_tests {
     #[test]
+    fn lost_colony_reserves_its_observed_loading_peak() {
+        assert!(super::validate_launch_memory(14 * 1024 * 1024 * 1024, "LostColony_WP").is_err());
+        assert!(super::validate_launch_memory(16 * 1024 * 1024 * 1024, "LostColony_WP").is_ok());
+    }
+    #[test]
     fn insufficient_commit_prevents_another_server_launch() {
-        assert!(super::validate_launch_memory(1024 * 1024 * 1024).is_err());
-        assert!(super::validate_launch_memory(8 * 1024 * 1024 * 1024).is_ok());
+        assert!(super::validate_launch_memory(1024 * 1024 * 1024, "TheIsland_WP").is_err());
+        assert!(super::validate_launch_memory(8 * 1024 * 1024 * 1024, "TheIsland_WP").is_ok());
     }
 }
 pub fn steam_log_path(data: &Path, id: &str) -> PathBuf {
