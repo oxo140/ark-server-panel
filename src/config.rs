@@ -83,7 +83,7 @@ pub fn schema() -> Vec<Setting> {
             GUS,
             "Difficulté de base",
             "Règles du monde",
-            "S’applique sans surcharge de difficulté. Le plafond calculé selon la carte est affiché dans les exemples dynamiques.",
+            "S’applique sans surcharge de difficulté. Le plafond estimé selon la carte et vos réglages s’affiche juste en dessous.",
             (0., 1., 0.1),
             1.,
         ),

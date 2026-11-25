@@ -1,5 +1,9 @@
 # ARK Server Panel
 
+### Version 1.8.1
+
+Les estimations sont affichées uniquement sous le réglage concerné et se recalculent lorsque son curseur ou sa valeur change. Le bloc récapitulatif « Exemples dynamiques » est supprimé. Les références de récolte et d’endurance sont placées auprès de leurs réglages ; les alertes restent intégrées aux estimations. La difficulté de base indique explicitement quand une surcharge de difficulté rend son curseur sans effet sur le plafond.
+
 ### Version 1.8.0
 
 - Disponibilité sans lancer le jeu : contrôle du processus ARK, du port UDP appartenant à ce processus, puis de l’annonce de disponibilité dans le journal ou d’une réponse RCON. RCON n’est plus obligatoire pour afficher un serveur prêt. Un bouton **Tester le serveur** actualise le diagnostic. La joignabilité depuis un autre ordinateur reste distincte du contrôle local.

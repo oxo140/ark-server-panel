@@ -74,6 +74,9 @@ fn calculate(map: &str, v: &Map<String, Value>, refs: &Value) -> Value {
     ] {
         tips.insert(k.into(), json!(difficulty));
     }
+    if over > 0. && !flag("MaxDifficulty") {
+        tips.insert("DifficultyOffset".into(),json!(format!("{difficulty} OverrideOfficialDifficulty={over} est prioritaire : déplacer ce curseur ne change pas le plafond tant que la surcharge reste active.")));
+    }
     if sp {
         warnings.push("Bonus solo natifs actifs : les calculs incluent les bonus de vitesse solo usuels. Les mods, événements et effets de monde ne sont pas inclus.".into());
     }
