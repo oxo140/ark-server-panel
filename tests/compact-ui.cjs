@@ -11,7 +11,7 @@ for (const dialog of d.querySelectorAll('dialog')) {
 const calls = [];
 w.fetch = async (_url, options) => {
   const input = JSON.parse(options.body); calls.push(input);
-  const data = input.action === 'serverStats' ? {running:true,ready:true,pid:123,memoryBytes:1024,uptimeSeconds:60,players:'No Players Connected'}
+  const data = input.action === 'serverStats' ? {running:true,ready:true,pid:123,memoryBytes:1024,uptimeSeconds:60,players:'No Players Connected',health:{state:'ready',rconReady:false,gamePortBound:true,advertised:true,message:'Serveur opérationnel localement'}}
     : input.action === 'readTuning' ? {fields:[],presets:[],hashes:{}}
     : input.action === 'readSchedule' ? {backupEnabled:true,backupHours:2,restartEnabled:false,restartTime:'06:00',updateEnabled:true,updateTime:'05:00',warningMinutes:5,message:'Maintenance {minutes}',lastResult:'Test OK'}
     : {text:'Test logs',message:'Enregistré'};
@@ -31,6 +31,9 @@ async function settle() { for(let i=0;i<8;i++) await new Promise(r=>setImmediate
     for(const color of ['green','red','blue','orange']) assert.ok(d.querySelector('#dashboard-servers .state-'+color));
     assert.ok(d.querySelector('#dashboard-servers [data-action=join][data-id=two]').disabled);
     assert.equal(d.querySelector('#dashboard-servers [data-action=detail]').textContent,'Stats du serveur');
+    d.querySelector('#dashboard-servers [data-action=testConnection]').click(); await settle();
+    assert.ok(!d.querySelector('#detail-dialog').open);
+    assert.ok(d.querySelector('#dashboard-servers .state-green').textContent.includes('jeu prêt'));
     d.querySelector('#dashboard-servers [data-action=detail]').click(); await settle();
     assert.ok(!d.querySelector('#tab-config').hidden);
     assert.ok(calls.some(c=>c.action==='readTuning'));

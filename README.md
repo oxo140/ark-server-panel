@@ -1,5 +1,14 @@
 # ARK Server Panel
 
+### Version 1.8.0
+
+- Disponibilité sans lancer le jeu : contrôle du processus ARK, du port UDP appartenant à ce processus, puis de l’annonce de disponibilité dans le journal ou d’une réponse RCON. RCON n’est plus obligatoire pour afficher un serveur prêt. Un bouton **Tester le serveur** actualise le diagnostic. La joignabilité depuis un autre ordinateur reste distincte du contrôle local.
+- Détection native Windows de l’adaptateur Tailscale, y compris lorsqu’il manque dans les compteurs réseau. L’adresse `100.x.x.x` est choisie par défaut avec le port de jeu du profil ; une adresse saisie explicitement reste conservée.
+- 91 réglages guidés, dont les gains par point du joueur et des dinos, les bonus d’apprivoisement et les cases de vitesse joueur/volants. Un bouton prépare les deux autorisations nécessaires à ASA.
+- Exemples dynamiques calculés en Rust : plafond sauvage selon carte/difficulté, Rex 150 pour l’apprivoisement, temps de reproduction/incubation/maturation, soins et alerte pour atteindre 100 % d’empreinte. Exemple de récolte avec référence personnalisable. Les calculs restent consultatifs et ne sauvegardent pas les brouillons.
+
+Les formules, sources et limites sont décrites dans [docs/calculations.md](docs/calculations.md).
+
 ### Correctif 1.7.2
 
 Lost Colony requiert désormais une marge minimale de 16 Gio de mémoire virtuelle disponible au lancement, contre 8 Gio pour les autres cartes. Ce contrôle couvre mieux le pic de chargement observé ; il ne garantit pas la capacité de toutes les configurations et mods.

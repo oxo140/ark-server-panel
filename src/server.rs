@@ -468,6 +468,7 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
         let mut core = app.core.lock().await;
         if action == "status" {
             let connections = crate::connections::load(&app.data)?;
+            let candidates = crate::connections::candidates();
             let profiles = core.settings.profiles.clone();
             let mut rows = vec![];
             for p in profiles {
@@ -491,10 +492,23 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
                     },
                     &job,
                 );
-                let connection = connections.get(&p.id).cloned().unwrap_or_default();
+                let connection = crate::connections::effective(
+                    connections.get(&p.id).cloned().unwrap_or_default(),
+                    &candidates,
+                );
                 let version = crate::versions::view(&app.data, &p, &job);
                 let operation = core.operations.get(&p.id).cloned();
-                let health = core.health.get(&p.id).cloned().unwrap_or(Value::Null);
+                let health = core
+                    .health
+                    .get(&p.id)
+                    .filter(|h| {
+                        core.manager
+                            .identities
+                            .get(&p.id)
+                            .is_some_and(|i| h["pid"] == i.pid && h["started"] == i.start)
+                    })
+                    .cloned()
+                    .unwrap_or(Value::Null);
                 rows.push(json!({"profile":p,"running":running,"resources":resources,"health":health,"job":job,"progress":progress,"connection":connection,"operation":operation,"serverVersion":version,"executablePresent":crate::manager::executable(&p).is_file()}));
             }
             return Ok(
@@ -555,10 +569,15 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
         let p = profile(&core, id)?;
         if action == "connectionInfo" || action == "setConnection" {
             let mut connections = crate::connections::load(&app.data)?;
-            let mut entry = connections.get(id).cloned().unwrap_or_default();
+            let candidates = crate::connections::candidates();
+            let mut entry = crate::connections::effective(
+                connections.get(id).cloned().unwrap_or_default(),
+                &candidates,
+            );
             if action == "setConnection" {
                 if let Some(host) = input["host"].as_str() {
                     entry.host = crate::connections::valid_host(host)?;
+                    entry.automatic = false;
                 }
                 if let Some(favorite) = input["favorite"].as_bool() {
                     entry.favorite = favorite;
@@ -572,7 +591,7 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
                 crate::connections::endpoint(&entry.host, p.game_port)
             };
             return Ok(
-                json!({"connection":entry,"address":address,"gamePort":p.game_port,"candidates":if action=="connectionInfo"{crate::connections::candidates()}else{vec![]},"message":"Adresse et favori enregistrés."}),
+                json!({"connection":entry,"address":address,"gamePort":p.game_port,"candidates":if action=="connectionInfo"{candidates}else{vec![]},"message":"Adresse et favori enregistrés."}),
             );
         }
         model::validate_profile(&p, &core.settings.profiles, &app.data)?;
@@ -624,19 +643,24 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
             });
             let running = core.manager.running(id);
             drop(core);
-            let password = model::admin_password(&p);
-            let probe = if running {
-                match password {
-                    Ok(pass) => crate::rcon::command(p.rcon_port, &pass, "ListPlayers").await,
-                    Err(e) => Err(e),
-                }
-            } else {
-                Err("Processus arrêté".into())
-            };
+            let health = assess_health(
+                &app,
+                &p,
+                running,
+                process.map(|p| p.pid().as_u32()).unwrap_or(0),
+                process.map(|p| p.start_time()).unwrap_or(0),
+            )
+            .await;
+            app.core
+                .lock()
+                .await
+                .health
+                .insert(p.id.clone(), health.clone());
             return Ok(
-                json!({"running":running,"ready":probe.is_ok(),"probeError":probe.as_ref().err(),"players":probe.as_ref().ok(),"pid":process.map(|p|p.pid().as_u32()),"memoryBytes":process.map(|p|p.memory()),"uptimeSeconds":process.map(|p|p.run_time()),"sampledAt":crate::now()}),
+                json!({"running":running,"ready":health["ready"],"health":health,"probeError":health["error"],"players":health["players"],"pid":process.map(|p|p.pid().as_u32()),"memoryBytes":process.map(|p|p.memory()),"uptimeSeconds":process.map(|p|p.run_time()),"sampledAt":crate::now()}),
             );
         }
+
         if action == "exportTuning" {
             let tuning = crate::config::read(&p)?;
             let values: serde_json::Map<String, Value> = tuning["fields"]
@@ -672,6 +696,9 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
         }
         if action == "readTuning" {
             return crate::config::read(&p);
+        }
+        if action == "previewTuning" {
+            return crate::simulation::preview(&p, &input["values"], &input["reference"]);
         }
         if action == "checkServerVersion" {
             if app.steam_busy.load(Ordering::SeqCst)
@@ -887,42 +914,57 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
         }
     }
 }
+async fn assess_health(app: &Shared, p: &Profile, running: bool, pid: u32, started: u64) -> Value {
+    let probe = if running {
+        match model::admin_password(p) {
+            Ok(pass) => crate::rcon::command(p.rcon_port, &pass, "ListPlayers").await,
+            Err(e) => Err(e),
+        }
+    } else {
+        Err("Serveur arrêté".into())
+    };
+    let previous = app
+        .core
+        .lock()
+        .await
+        .health
+        .get(&p.id)
+        .cloned()
+        .unwrap_or(Value::Null);
+    let advertised = running
+        && (crate::readiness::advertised(p, started)
+            || (previous["pid"] == pid
+                && previous["started"] == started
+                && previous["advertised"] == true));
+    let game_port = running && crate::readiness::game_port_bound(pid, p.game_port);
+    let ready = running && game_port && (advertised || probe.is_ok());
+    let state = if !running {
+        "offline"
+    } else if ready {
+        "ready"
+    } else if crate::now().saturating_sub(started) < 900 {
+        "starting"
+    } else {
+        "unreachable"
+    };
+    json!({"pid":pid,"started":started,"state":state,"ready":ready,"checkedAt":crate::now(),"rconReady":probe.is_ok(),"advertised":advertised,"gamePortBound":game_port,"remoteVerified":false,"error":probe.as_ref().err(),"players":probe.as_ref().ok(),"message":if ready {"Serveur opérationnel localement : port UDP détenu par ARK et disponibilité confirmée. L’accès depuis un autre PC Tailscale reste à tester."}else if !running {"Serveur arrêté."}else {"Démarrage ou disponibilité du port de jeu non confirmé."}})
+}
 async fn refresh_health(app: &Shared) {
     let profiles = app.core.lock().await.settings.profiles.clone();
     for p in profiles {
-        let (running, uptime) = {
+        let (running, pid, started) = {
             let mut c = app.core.lock().await;
             c.manager.discover(&p);
+            let running = c.manager.running(&p.id);
+            let identity = c.manager.identities.get(&p.id);
             (
-                c.manager.running(&p.id),
-                c.manager
-                    .identities
-                    .get(&p.id)
-                    .map(|i| crate::now().saturating_sub(i.start))
-                    .unwrap_or(0),
+                running,
+                identity.map(|i| i.pid).unwrap_or(0),
+                identity.map(|i| i.start).unwrap_or(0),
             )
         };
-        let probe = if running {
-            match model::admin_password(&p) {
-                Ok(pass) => crate::rcon::command(p.rcon_port, &pass, "ListPlayers").await,
-                Err(e) => Err(e),
-            }
-        } else {
-            Err("Serveur arrêté".into())
-        };
-        let state = if !running {
-            "offline"
-        } else if probe.is_ok() {
-            "ready"
-        } else if uptime < 900 {
-            "starting"
-        } else {
-            "unreachable"
-        };
-        app.core.lock().await.health.insert(
-            p.id,
-            json!({"state":state,"checkedAt":crate::now(),"error":probe.err()}),
-        );
+        let health = assess_health(app, &p, running, pid, started).await;
+        app.core.lock().await.health.insert(p.id, health);
     }
 }
 async fn wait_steam(app: &Shared, id: &str) -> Result<(), String> {

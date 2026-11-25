@@ -1,0 +1,19 @@
+const fs=require('fs'),path=require('path'),assert=require('assert/strict'),{spawn}=require('child_process'),{JSDOM}=require('../.tools/dom/node_modules/jsdom');
+const root=path.resolve('.runtime/tuning-live-'+crypto.randomUUID()),key='isolated-tuning-ui-live-key-credential',base='http://127.0.0.1:3093';fs.mkdirSync(root,{recursive:true});fs.writeFileSync(root+'/access-key.txt',key);const child=spawn(path.resolve('target/debug/ark-server-panel.exe'),['--serve'],{windowsHide:true,stdio:'ignore',env:{...process.env,ARK_PANEL_DATA:root,ARK_PANEL_PORT:'3093',ARK_PANEL_NO_BROWSER:'1',ARK_PANEL_NO_TRAY:'1'}});let dom;
+const pause=ms=>new Promise(r=>setTimeout(r,ms));
+async function api(action,values={}){const r=await fetch(base+'/api',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+key},body:JSON.stringify({action,...values})});const j=await r.json();if(!r.ok)throw Error(j.error);return j;}
+async function until(fn){for(let i=0;i<100;i++){if(fn())return;await pause(50);}throw Error('Timed out waiting for UI condition');}
+(async()=>{try{for(let i=0;i<100;i++){try{if((await fetch(base+'/health')).ok)break;}catch{}await pause(100);}
+const p=(await api('saveProfile',{profile:{name:'Simulation UI fixture',directory:root+'-server',map:'TheIsland_WP',gamePort:19477,rconPort:29477,mods:''}})).profile;
+dom=new JSDOM(fs.readFileSync('web/index.html','utf8'),{url:base+'/#'+key,runScripts:'outside-only'});const w=dom.window,d=w.document;w.confirm=()=>true;w.fetch=(url,options)=>fetch(base+url,options);for(const dialog of d.querySelectorAll('dialog')){dialog.showModal=function(){this.open=true};dialog.close=function(){this.open=false};}
+w.eval(fs.readFileSync('web/app.js','utf8')+'\nwindow.testControls=()=>tuningControls;');await until(()=>d.querySelector('[data-action=detail]'));d.querySelector('[data-action=detail]').click();await until(()=>d.querySelectorAll('.setting-row').length>60);await until(()=>d.querySelector('#preview-cards').textContent.includes('120'));
+function input(key,value){const control=w.testControls().get(key).input;control.value=value;control.dispatchEvent(new w.Event('input',{bubbles:true}));return control;}
+input('OverrideOfficialDifficulty',10);await until(()=>d.querySelector('#preview-cards').textContent.includes('maximum 300'));
+input('BabyMatureSpeedMultiplier',200);await until(()=>d.querySelector('#preview-warnings').textContent.includes('100 % impossible'));
+input('BabyCuddleIntervalMultiplier',0.001);await until(()=>!d.querySelector('#preview-warnings').textContent.includes('100 % impossible'));
+input('PerLevelStatsMultiplier_Player[1]',2);input('PerLevelStatsMultiplier_DinoTamed[1]',2);await until(()=>d.querySelector('#tuning-groups').textContent.includes('+20.0 endurance')&&d.querySelector('#tuning-groups').textContent.includes('+84.0 par point'));
+d.querySelector('#classic-speed').click();assert.equal(w.testControls().get('bAllowSpeedLeveling').input.checked,true);assert.equal(w.testControls().get('bAllowFlyerSpeedLeveling').input.checked,true);
+const before=await api('readTuning',{id:p.id});assert.ok(before.fields.every(f=>!f.configured),'Simulation must never write INI');d.querySelector('#save-tuning').click();await until(()=>d.querySelector('#detail-message').textContent.includes('enregistr'));
+const after=await api('readTuning',{id:p.id});assert.equal(after.fields.find(f=>f.key==='PerLevelStatsMultiplier_Player[1]').value,2);assert.equal(after.fields.find(f=>f.key==='bAllowFlyerSpeedLeveling').value,true);
+console.log('PASS: actual Rust API + browser DOM: dynamic map cap 120→300, impossible imprint warning and recovery, stamina ×2 examples, paired flyer flags, preview is read-only, explicit save round-trips indexed INI keys. '+after.fields.length+' settings.');
+}finally{dom?.window.close();try{await api('quitPanel');await pause(800);}catch{}child.kill();}})().catch(e=>{console.error(e);process.exitCode=1});
