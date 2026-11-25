@@ -40,3 +40,5 @@ button.primary{background:linear-gradient(110deg,#61dfb8,#63cce6);border-color:#
 
 
 .setting-copy .setting-example{padding:.75rem;border-left:3px solid #55dbc4;background:#45c9c608;font-size:.9rem;color:#b9e3df}.estimate-reference{display:flex;flex-wrap:wrap;gap:.7rem;margin:.7rem 0}.estimate-reference label{display:grid;gap:.4rem;font-size:.85rem;max-width:18rem}.estimate-reference input{max-width:12rem}.estimate-reference small{flex-basis:100%}.setting-copy #classic-speed{margin-top:.7rem}
+
+.tailscale-qr{display:block;width:240px;height:240px;max-width:100%;object-fit:contain;background:white;padding:8px;border-radius:12px;margin:1rem 0}.tailscale-server{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;padding:1rem 0;border-bottom:1px solid #34515a}.tailscale-server>span{display:grid;gap:.5rem;flex:1;min-width:220px}.tailscale-server code{color:#68dbcc}

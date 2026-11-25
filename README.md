@@ -1,5 +1,11 @@
 # ARK Server Panel
 
+### Version 1.9.0
+
+Un onglet **Tailscale** donne accès au site officiel, à un QR code de téléchargement généré localement en Rust, aux IP détectées et aux adresses de jeu avec leurs ports. Le QR ne contient ni clé du panneau, ni invitation au tailnet. L’installation et la connexion de l’appareil se font dans Tailscale.
+
+La flèche de la liste des serveurs lancés ouvre le menu de connexion. Le champ et les suggestions affichent l’adresse complète avec le port de jeu du profil. Une adresse saisie sans port reçoit ce port automatiquement ; un autre port est refusé pour éviter de rejoindre le port RCON ou une autre instance. Les estimations restent directement sous les curseurs, comme dans la version 1.8.1.
+
 ### Version 1.8.1
 
 Les estimations sont affichées uniquement sous le réglage concerné et se recalculent lorsque son curseur ou sa valeur change. Le bloc récapitulatif « Exemples dynamiques » est supprimé. Les références de récolte et d’endurance sont placées auprès de leurs réglages ; les alertes restent intégrées aux estimations. La difficulté de base indique explicitement quand une surcharge de difficulté rend son curseur sans effet sur le plafond.

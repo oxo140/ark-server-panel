@@ -14,6 +14,7 @@ mod simulation;
 mod startup;
 mod steamcmd;
 mod supervisor;
+mod tailscale;
 mod tray;
 mod updates;
 mod versions;

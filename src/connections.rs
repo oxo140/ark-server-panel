@@ -75,6 +75,29 @@ pub fn endpoint(host: &str, port: u16) -> String {
         format!("{host}:{port}")
     }
 }
+pub fn connection_host(input: &str, port: u16) -> Result<String, String> {
+    let input = input.trim();
+    let mismatch = || {
+        format!(
+            "Ce serveur utilise le port de jeu {port}. Pour le changer, modifiez le profil du serveur."
+        )
+    };
+    if let Ok(socket) = input.parse::<std::net::SocketAddr>() {
+        if socket.port() != port {
+            return Err(mismatch());
+        }
+        return valid_host(&socket.ip().to_string());
+    }
+    if let Some((host, suffix)) = input.rsplit_once(':')
+        && !host.contains(':')
+    {
+        if suffix.parse::<u16>().ok() != Some(port) {
+            return Err(mismatch());
+        }
+        return valid_host(host);
+    }
+    valid_host(input)
+}
 pub fn candidates() -> Vec<Value> {
     let nets = sysinfo::Networks::new_with_refreshed_list();
     let mut found = BTreeMap::new();
@@ -191,6 +214,21 @@ fn tailscale_addresses() -> Vec<Ipv4Addr> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn connection_accepts_profile_endpoint_without_changing_its_port() {
+        assert_eq!(
+            super::connection_host("100.101.102.103:7777", 7777).unwrap(),
+            "100.101.102.103"
+        );
+        assert_eq!(
+            super::connection_host("server.tailnet.ts.net:7787", 7787).unwrap(),
+            "server.tailnet.ts.net"
+        );
+        assert_eq!(super::connection_host("[::1]:7787", 7787).unwrap(), "::1");
+        assert!(super::connection_host("100.101.102.103:27020", 7777).is_err());
+        assert!(super::connection_host("http://evil:7777", 7777).is_err());
+        assert!(super::connection_host("x?Password=bad:7777", 7777).is_err());
+    }
     #[test]
     fn legacy_lan_address_prefers_tailscale_but_manual_choice_is_kept() {
         let entry: Entry =

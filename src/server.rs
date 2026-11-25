@@ -101,6 +101,7 @@ async fn api(State(app): State<Shared>, headers: HeaderMap, Json(input): Json<Va
 }
 pub fn router(app: Shared) -> Router {
     Router::new()
+        .route("/tailscale-qr.svg",get(||async{secure(crate::tailscale::download_qr(),Some("image/svg+xml; charset=utf-8"))}))
         .route("/",get(||async{secure(Html(include_str!("../web/index.html")),None)}))
         .route("/app.js",get(||async{secure(include_str!("../web/app.js"),Some("application/javascript; charset=utf-8"))}))
         .route("/history.js",get(||async{secure(include_str!("../web/history.js"),Some("application/javascript; charset=utf-8"))}))
@@ -257,6 +258,15 @@ fn idle(core: &mut Core, p: &Profile) -> Result<(), String> {
 }
 async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
     let action = field(&input, "action")?;
+    if action == "tailscaleStatus" {
+        let addresses: Vec<_> = crate::connections::candidates()
+            .into_iter()
+            .filter(|a| a["rank"] == 0)
+            .collect();
+        return Ok(
+            json!({"detected":!addresses.is_empty(),"addresses":addresses,"downloadUrl":crate::tailscale::DOWNLOAD_URL}),
+        );
+    }
     if action == "startupStatus" {
         let mut value = crate::startup::status();
         value["trayActive"] = json!(crate::tray::active());
@@ -576,7 +586,7 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
             );
             if action == "setConnection" {
                 if let Some(host) = input["host"].as_str() {
-                    entry.host = crate::connections::valid_host(host)?;
+                    entry.host = crate::connections::connection_host(host, p.game_port)?;
                     entry.automatic = false;
                 }
                 if let Some(favorite) = input["favorite"].as_bool() {
