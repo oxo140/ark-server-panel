@@ -113,6 +113,20 @@ Les sauvegardes, versions téléchargées, copies INI et anciens dossiers Saved 
 
 La V1 n’inclut pas : planificateur, Discord, orchestration de plusieurs machines, assistant réseau, rotation automatique des journaux, gestionnaire de clusters ou catalogue des mods. Les contrôles de base sont testés avec des fichiers et services simulés ; une installation et une connexion ARK réelles restent nécessaires pour valider chaque environnement.
 
+## Historique des performances et serveur en arrière-plan
+
+Le tableau de bord conserve les dix dernières minutes du CPU, de la RAM et des débits disque/réseau de la machine hôte, avec une mesure toutes les deux secondes. Les courbes se consultent au survol ou avec les flèches du clavier. Le réseau historique cumule les interfaces ; le disque cumule les volumes. Il ne s’agit pas des ressources d’un seul processus ARK.
+
+Les mesures sont enregistrées localement dans `metrics-history.json` toutes les dix secondes et rechargées au prochain lancement, en ne conservant que la fenêtre des dix dernières minutes. Le relevé fonctionne tant que le panneau est actif ; une interruption apparaît comme un trou dans la courbe.
+
+Le serveur ARK se lance sans la fenêtre provoquée par `-log`. Ses sorties et son fichier `ShooterGame.log` restent accessibles dans **Gérer / terminal**. Ce comportement prend effet au prochain lancement du serveur ; la mise à jour du panneau n’arrête pas un serveur déjà actif.
+
+## Mise à jour publique sans compte
+
+Depuis la version 1.5, la mise à jour utilise directement la dernière publication publique et les références Git du dépôt. Elle ne consomme plus le quota de l’API REST GitHub. Le manifeste doit toujours correspondre au commit du tag, puis le fichier doit respecter la taille et SHA-256 annoncés avant activation.
+
+Si une ancienne version est bloquée par une erreur 403, extraire le nouveau paquet d’installation puis lancer **Mettre a jour ARK Panel.vbs**. Ce raccourci télécharge uniquement le panneau et prépare son remplacement. Si le panneau est déjà ouvert, cliquer ensuite sur **Redémarrer le panneau** dans ses paramètres. Les contrôles d’opérations en cours et la conservation des données restent les mêmes.
+
 ## Développement
 
 Prérequis : Rust stable et les outils C++ MSVC pour compiler sous Windows. Node.js est uniquement utile pour vérifier la syntaxe JavaScript ; il n’est pas requis à l’exécution.

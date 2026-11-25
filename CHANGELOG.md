@@ -1,5 +1,13 @@
 # Modifications
 
+## 1.5.0 — 25 novembre 2026
+
+- Lancement ARK sans fenêtre de journal : suppression de `-log`, sortie standard récupérée dans le panneau et mode sans console.
+- Historique glissant de dix minutes du CPU, de la RAM et des débits disque/réseau de l’hôte : graphiques consultables à la souris ou au clavier, échantillonnage toutes les deux secondes et sauvegarde locale toutes les dix secondes.
+- Vérification et téléchargement des mises à jour depuis les publications publiques et références Git, sans utiliser l’API REST GitHub ni demander de compte.
+- Conservation des contrôles du tag, du commit, de la taille et de SHA-256 avant activation.
+- Nouveau raccourci « Mettre a jour ARK Panel.vbs » pour préparer une mise à jour, y compris depuis une ancienne version bloquée par le quota API.
+
 ## 1.4.0 — 25 novembre 2026
 
 - Barre SteamCMD avec pourcentage réel directement dans les cartes de serveur, sans ouvrir le terminal.

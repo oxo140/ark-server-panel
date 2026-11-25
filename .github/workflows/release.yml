@@ -31,7 +31,7 @@ jobs:
           Copy-Item target/release/ark-server-panel.exe $asset
           $manifest = @{ name='ark-server-panel'; version=$version; sourceSha=$env:GITHUB_SHA; asset=$asset; size=(Get-Item $asset).Length; sha256=(Get-FileHash $asset -Algorithm SHA256).Hash.ToLowerInvariant() }
           $manifest | ConvertTo-Json | Set-Content release.json -Encoding utf8NoBOM
-          Compress-Archive -Path 'Ouvrir ARK Panel.vbs',launch.ps1,README.md -DestinationPath ark-server-panel-install.zip
+          Compress-Archive -Path 'Ouvrir ARK Panel.vbs','Mettre a jour ARK Panel.vbs',launch.ps1,README.md -DestinationPath ark-server-panel-install.zip
       - uses: actions/upload-artifact@v4
         with:
           name: ark-server-panel-windows

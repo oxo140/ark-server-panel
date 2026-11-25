@@ -66,7 +66,7 @@ function renderMetrics(){const m=metricSnapshot;if(!m?.ready)return;$('#metrics-
   const select=$('#network-interface'),names=(m.interfaces||[]).map(x=>x.name),current=select.value;if(select.dataset.interfaces!==JSON.stringify(names)){select.innerHTML='<option value="__all__">Interfaces cumulées</option>'+names.map(n=>`<option value="${escape(n)}">${escape(n)}</option>`).join('');select.dataset.interfaces=JSON.stringify(names);if(names.includes(current))select.value=current;}const rows=(m.interfaces||[]).filter(x=>select.value==='__all__'||x.name===select.value);$('#metric-network').textContent=`${bytes(rows.reduce((n,x)=>n+x.receivedBytesPerSec,0))}/s · ${bytes(rows.reduce((n,x)=>n+x.transmittedBytesPerSec,0))}/s`;
 }
 function renderJobMetrics(){const m=metricSnapshot;if(!m?.ready)return;const values={cpu:$('#metric-cpu').textContent,ram:bytes(m.memory.usedBytes)+' / '+bytes(m.memory.totalBytes),disk:$('#metric-disk').textContent,network:$('#metric-network').textContent};$$('[data-job-metric]').forEach(el=>{el.textContent=values[el.dataset.jobMetric];});}
-async function refreshMetrics(){if(!key||metricsPolling)return;metricsPolling=true;try{metricSnapshot=await api('metrics');renderMetrics();renderJobMetrics();}catch{}finally{metricsPolling=false;}}
+async function refreshMetrics(){if(!key||metricsPolling)return;metricsPolling=true;try{metricSnapshot=await api('metrics');renderMetrics();renderJobMetrics();if(window.renderHistory)window.renderHistory(metricSnapshot);}catch{}finally{metricsPolling=false;}}
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
   if(b.classList.contains('add-profile'))openProfile();
   if(b.classList.contains('close-dialog'))closeDialog(b.closest('dialog'));

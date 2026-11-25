@@ -167,7 +167,12 @@ impl Manager {
             .arg(format!("{}?listen?SessionName={}", p.map, p.name))
             .arg(format!("-Port={}", p.game_port))
             .arg(format!("-RCONPort={}", p.rcon_port))
-            .arg("-log");
+            .args([
+                "-stdout",
+                "-FullStdOutLogOutput",
+                "-unattended",
+                "-NoConsole",
+            ]);
         if !p.mods.is_empty() {
             cmd.arg(format!("-mods={}", p.mods));
         }

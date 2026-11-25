@@ -102,6 +102,7 @@ pub fn router(app: Shared) -> Router {
     Router::new()
         .route("/",get(||async{secure(Html(include_str!("../web/index.html")),None)}))
         .route("/app.js",get(||async{secure(include_str!("../web/app.js"),Some("application/javascript; charset=utf-8"))}))
+        .route("/history.js",get(||async{secure(include_str!("../web/history.js"),Some("application/javascript; charset=utf-8"))}))
         .route("/style.css",get(||async{secure(include_str!("../web/style.css"),Some("text/css; charset=utf-8"))}))
         .route("/health",get(||async{secure(Json(json!({"ok":true,"revision":updates::REVISION,"boot":std::env::var("ARK_PANEL_BOOT").unwrap_or_default()})),None)}))
         .route("/api",post(api)).layer(DefaultBodyLimit::max(2*1024*1024)).with_state(app)
@@ -157,13 +158,13 @@ pub async fn serve() -> Result<(), String> {
             },
             steam_install: Value::Null,
         }),
-        data,
+        data: data.clone(),
         token,
         host: format!("{address}:{port}"),
         shutdown: Notify::new(),
         update_busy: AtomicBool::new(false),
         steam_busy: AtomicBool::new(false),
-        metrics: crate::metrics::start(),
+        metrics: crate::metrics::start(data),
     });
     let background = app.clone();
     tokio::spawn(async move {
