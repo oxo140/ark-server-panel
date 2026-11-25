@@ -1,5 +1,11 @@
 # Modifications
 
+## 1.3.2 — 25 novembre 2026
+
+- Diagnostics détaillés ouverts par défaut, toujours repliables, avec couleurs distinctes pour erreurs, avertissements, succès et activité.
+- Palette inspirée d’ARK : turquoise, bleu, améthyste et ambre, dégradés du logo, titres et progression, accents colorés des performances.
+
+
 ## 1.3.1 — 25 novembre 2026
 
 - Ligne CPU, RAM, débits disque et réseau sous les barres de progression ASA et SteamCMD, actualisée toutes les deux secondes avec les mesures de la machine hôte.

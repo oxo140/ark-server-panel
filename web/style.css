@@ -8,3 +8,22 @@
 .job-progress{padding:16px;border:1px solid var(--line);border-radius:12px;margin-bottom:16px}.job-progress progress{width:100%;height:14px;accent-color:#4ad9ba}.job-progress p{margin:0 0 10px}
 
 .job-host-metrics{display:flex;flex-wrap:wrap;gap:8px 24px;margin-top:14px;color:var(--muted);font-size:.8rem;line-height:1.6}.job-host-metrics span{min-width:0}.job-host-metrics b{color:var(--text);font-weight:500;font-variant-numeric:tabular-nums}
+
+/* ARK-inspired mineral accents: turquoise, blue, amethyst and amber. */
+:root{--ark-gradient:linear-gradient(110deg,#5cddaf 0%,#50c8ed 38%,#b69af2 72%,#efbc79 100%)}
+body{background:radial-gradient(ellipse at 85% 0%,#30587919,transparent 45%),radial-gradient(ellipse at 8% 80%,#6a49851a,transparent 45%),var(--bg)}
+.brand-icon{background:var(--ark-gradient)}
+.page-heading h1{background:var(--ark-gradient);background-clip:text;-webkit-background-clip:text;color:transparent}
+button.primary{background:linear-gradient(110deg,#61dfb8,#63cce6);border-color:#83e3d0;color:#09252b}button.primary:hover{background:linear-gradient(110deg,#84edd0,#8adef2)}
+.server-card,.panel,.job-progress{background:linear-gradient(135deg,#182c31,#17222e 65%,#252238);border-color:#39505b}
+.job-progress progress{appearance:none;-webkit-appearance:none;border:1px solid #52616c;border-radius:20px;overflow:hidden;background:#27343e}
+.job-progress progress::-webkit-progress-bar{background:#27343e}.job-progress progress::-webkit-progress-value{background:var(--ark-gradient);border-radius:20px}.job-progress progress::-moz-progress-bar{background:var(--ark-gradient);border-radius:20px}
+.job-progress progress:indeterminate{background:linear-gradient(110deg,#27343e 20%,#54c9d9 50%,#27343e 80%);background-size:220% 100%;animation:ark-wait 1.8s linear infinite}
+@keyframes ark-wait{from{background-position:120% 0}to{background-position:-100% 0}}
+.ark-diagnostics{border:1px solid #47516a;border-radius:12px;padding:14px 16px;margin:16px 0;background:linear-gradient(120deg,#15262f,#221e32)}
+.ark-diagnostics summary{cursor:pointer;color:#bfdcf0;font-weight:600}.ark-diagnostics[open] summary{margin-bottom:12px}
+.ark-diagnostics pre{margin:0;background:#0b131d;border-color:#344452;color:#becddc;max-height:330px;overflow:auto}
+.log-error{color:#ff9b97}.log-warning{color:#efc586}.log-success{color:#83e1b4}.log-activity{color:#86cff2}.log-plain{color:#becddc}
+.job-host-metrics span:nth-child(1) b{color:#83e1b4}.job-host-metrics span:nth-child(2) b{color:#86cff2}.job-host-metrics span:nth-child(3) b{color:#c7aff2}.job-host-metrics span:nth-child(4) b{color:#efc586}
+@media(prefers-reduced-motion:reduce){.job-progress progress:indeterminate{animation:none}}
+.job-progress progress:indeterminate::-webkit-progress-bar{background:transparent}
