@@ -38,6 +38,7 @@ pub struct Manager {
     pub identities: HashMap<String, Identity>,
     pub children: HashMap<String, Child>,
     pub jobs: HashMap<String, Child>,
+    pub job_identities: HashMap<String, Identity>,
     pub data: PathBuf,
 }
 impl Manager {
@@ -46,6 +47,7 @@ impl Manager {
             identities: crate::model::load(&data.join("processes.json"))?,
             children: HashMap::new(),
             jobs: HashMap::new(),
+            job_identities: crate::model::load(&data.join("jobs.json"))?,
             data,
         })
     }
@@ -101,19 +103,52 @@ impl Manager {
         self.job_status(id)["running"] == true
     }
     pub fn job_status(&mut self, id: &str) -> serde_json::Value {
+        let stored =
+            crate::model::load::<serde_json::Value>(&self.data.join(format!("job-{id}.json")))
+                .unwrap_or(serde_json::Value::Null);
+        if stored["running"] == false {
+            self.jobs.remove(id);
+            self.job_identities.remove(id);
+            return stored;
+        }
         if let Some(child) = self.jobs.get_mut(id) {
             match child.try_wait() {
                 Ok(Some(status)) => {
                     self.jobs.remove(id);
-                    let value = serde_json::json!({"running":false,"success":status.success(),"exitCode":status.code()});
+                    let value = serde_json::json!({"running":false,"success":false,"exitCode":status.code(),"kind":stored["kind"],"message":"La console SteamCMD s’est fermée sans confirmer la fin de la tâche. Consultez le terminal."});
                     let _ = crate::model::save(&self.data.join(format!("job-{id}.json")), &value);
                     value
                 }
-                _ => serde_json::json!({"running":true}),
+                _ => {
+                    if stored.is_object() {
+                        stored
+                    } else {
+                        serde_json::json!({"running":true})
+                    }
+                }
             }
         } else {
-            crate::model::load::<serde_json::Value>(&self.data.join(format!("job-{id}.json")))
-                .unwrap_or(serde_json::Value::Null)
+            if stored["running"] == true {
+                let alive = self.job_identities.get(id).is_some_and(|identity| {
+                    let system = System::new_all();
+                    system
+                        .process(Pid::from_u32(identity.pid))
+                        .is_some_and(|p| {
+                            p.start_time() == identity.start
+                                && p.exe().is_some_and(|e| {
+                                    normalized_executable(e)
+                                        == normalized_executable(Path::new(&identity.executable))
+                                })
+                        })
+                });
+                if alive {
+                    return stored;
+                }
+                let value = serde_json::json!({"running":false,"success":false,"kind":stored["kind"],"message":"Tâche SteamCMD interrompue. Vérifiez le journal avant de relancer."});
+                let _ = crate::model::save(&self.data.join(format!("job-{id}.json")), &value);
+                return value;
+            }
+            stored
         }
     }
     pub fn start(&mut self, p: &Profile) -> Result<(), String> {
@@ -168,7 +203,7 @@ impl Manager {
             .open(self.data.join("logs").join(format!("{id}.log")))
             .map_err(|e| e.to_string())
     }
-    pub fn install(&mut self, p: &Profile, steamcmd: &str) -> Result<(), String> {
+    pub fn install(&mut self, p: &Profile, steamcmd: &str, visible: bool) -> Result<(), String> {
         if self.running(&p.id) || self.busy(&p.id) {
             return Err(
                 "Arrêter le serveur et attendre la fin des opérations avant installation.".into(),
@@ -178,31 +213,58 @@ impl Manager {
             return Err("Renseigner le chemin absolu de steamcmd.exe dans les paramètres.".into());
         }
         fs::create_dir_all(&p.directory).map_err(|e| e.to_string())?;
-        let log = self.log_file(&p.id)?;
-        let child = hidden(
-            Command::new(steamcmd)
-                .current_dir(Path::new(steamcmd).parent().unwrap())
-                .args([
-                    "+force_install_dir",
-                    &p.directory,
-                    "+login",
-                    "anonymous",
-                    "+app_update",
-                    "2430930",
-                    "validate",
-                    "+quit",
-                ]),
+        self.steam_job(
+            &p.id,
+            "install",
+            steamcmd,
+            Some(Path::new(&p.directory)),
+            visible,
         )
-        .stdin(Stdio::null())
-        .stdout(log.try_clone().map_err(|e| e.to_string())?)
-        .stderr(log)
-        .spawn()
-        .map_err(|e| e.to_string())?;
-        self.jobs.insert(p.id.clone(), child);
-        Ok(())
+    }
+    pub fn steam_job(
+        &mut self,
+        id: &str,
+        kind: &str,
+        steamcmd: &str,
+        directory: Option<&Path>,
+        visible: bool,
+    ) -> Result<(), String> {
+        if self.any_busy() {
+            return Err("Une opération SteamCMD est déjà en cours. Attendez sa fin.".into());
+        }
+        fs::create_dir_all(self.data.join("logs")).map_err(|e| e.to_string())?;
+        let spec = crate::console::JobSpec {
+            run_id: uuid::Uuid::new_v4().to_string(),
+            kind: kind.into(),
+            steamcmd: PathBuf::from(steamcmd),
+            directory: directory.map(Path::to_path_buf),
+            log: steam_log_path(&self.data, id),
+            result: self.data.join(format!("job-{id}.json")),
+            visible,
+        };
+        let child = crate::console::launch(&spec, &self.data.join(format!("job-spec-{id}.json")))?;
+        let pid = child.id();
+        let system = System::new_all();
+        let start = system
+            .process(Pid::from_u32(pid))
+            .map(|p| p.start_time())
+            .unwrap_or(0);
+        self.job_identities.insert(
+            id.into(),
+            Identity {
+                pid,
+                start,
+                executable: normalized_executable(
+                    &std::env::current_exe().map_err(|e| e.to_string())?,
+                ),
+            },
+        );
+        self.jobs.insert(id.into(), child);
+        crate::model::save(&self.data.join("jobs.json"), &self.job_identities)
     }
     pub fn logs(&self, p: &Profile) -> Result<String, String> {
         let candidates = [
+            steam_log_path(&self.data, &p.id),
             self.data.join("logs").join(format!("{}.log", p.id)),
             Path::new(&p.directory).join("ShooterGame/Saved/Logs/ShooterGame.log"),
         ];
@@ -229,9 +291,21 @@ impl Manager {
         Ok(result)
     }
     pub fn any_busy(&mut self) -> bool {
-        let ids: Vec<_> = self.jobs.keys().cloned().collect();
+        let ids: std::collections::HashSet<_> = self
+            .jobs
+            .keys()
+            .chain(self.job_identities.keys())
+            .cloned()
+            .collect();
         ids.iter().any(|id| self.busy(id))
     }
+}
+pub fn steam_log_path(data: &Path, id: &str) -> PathBuf {
+    data.join("logs").join(if id == "_steamcmd" {
+        "steamcmd.log".into()
+    } else {
+        format!("{id}-steamcmd.log")
+    })
 }
 pub fn copy_tree(from: &Path, to: &Path) -> Result<(), String> {
     let metadata = fs::symlink_metadata(from).map_err(|e| e.to_string())?;

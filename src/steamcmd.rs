@@ -29,7 +29,7 @@ pub fn valid_executable(path: &Path) -> bool {
     file.read_exact(&mut signature).is_ok() && signature == *b"PE\0\0"
 }
 pub fn managed_path(data: &Path) -> PathBuf {
-    data.join("tools/steamcmd/steamcmd.exe")
+    data.join("tools").join("steamcmd").join("steamcmd.exe")
 }
 pub fn status(configured: &str, data: &Path) -> Value {
     let mut candidates = vec![];
@@ -87,8 +87,37 @@ pub fn extract_bootstrap(bytes: &[u8]) -> Result<Vec<u8>, String> {
     }
     Err("steamcmd.exe est absent de l’archive officielle.".into())
 }
-pub async fn download(data: &Path) -> Result<PathBuf, String> {
-    let target = managed_path(data);
+pub fn validate_directory(directory: &Path) -> Result<(), String> {
+    if !directory.is_absolute()
+        || directory.parent().is_none()
+        || directory
+            .components()
+            .any(|c| matches!(c, std::path::Component::ParentDir))
+        || directory.to_string_lossy().contains('\0')
+    {
+        return Err("Choisissez un dossier absolu dédié, par exemple D:\\SteamCMD, et non la racine d’un disque.".into());
+    }
+    let mut current = Some(directory);
+    while let Some(path) = current {
+        if let Ok(meta) = fs::symlink_metadata(path) {
+            #[cfg(windows)]
+            {
+                use std::os::windows::fs::MetadataExt;
+                if meta.file_attributes() & 0x400 != 0 {
+                    return Err("Choisissez un dossier sans jonction ni lien symbolique.".into());
+                }
+            }
+            if meta.file_type().is_symlink() {
+                return Err("Les liens symboliques ne sont pas acceptés.".into());
+            }
+        }
+        current = path.parent();
+    }
+    Ok(())
+}
+pub async fn download_to(directory: &Path) -> Result<PathBuf, String> {
+    validate_directory(directory)?;
+    let target = directory.join("steamcmd.exe");
     if valid_executable(&target) {
         return Ok(target);
     }
@@ -134,6 +163,23 @@ pub async fn download(data: &Path) -> Result<PathBuf, String> {
     fs::rename(&staged, &target).map_err(|e| e.to_string())?;
     let _ = fs::remove_dir(stage);
     Ok(target)
+}
+pub fn pick_directory(initial: &str) -> Result<Option<PathBuf>, String> {
+    #[cfg(windows)]
+    {
+        let mut dialog =
+            rfd::FileDialog::new().set_title("Choisir un dossier sur la machine Windows hôte");
+        let initial = Path::new(initial);
+        if let Some(existing) = initial.ancestors().find(|p| p.is_dir()) {
+            dialog = dialog.set_directory(existing);
+        }
+        Ok(dialog.pick_folder())
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = initial;
+        Err("La sélection native de dossier nécessite Windows.".into())
+    }
 }
 
 #[cfg(test)]

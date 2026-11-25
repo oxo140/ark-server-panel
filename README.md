@@ -111,7 +111,7 @@ Dossier par défaut : `%LOCALAPPDATA%\ArkServerPanel`. `ARK_PANEL_DATA` permet d
 
 Les sauvegardes, versions téléchargées, copies INI et anciens dossiers Saved ne sont pas supprimés automatiquement. Prévoir l’espace disque et la rétention manuellement. Ne pas lancer un serveur avec un outil extérieur pendant une sauvegarde ou une restauration. Une fermeture brutale de Windows peut interrompre une opération ; seules les sauvegardes avec un marqueur `complete.json` et des empreintes valides sont restaurables.
 
-La V1 n’inclut pas : planificateur, Discord, supervision CPU/RAM, orchestration de plusieurs machines, assistant réseau, rotation automatique des journaux, gestionnaire de clusters ou catalogue des mods. Les contrôles de base sont testés avec des fichiers et services simulés ; une installation et une connexion ARK réelles restent nécessaires pour valider chaque environnement.
+La V1 n’inclut pas : planificateur, Discord, orchestration de plusieurs machines, assistant réseau, rotation automatique des journaux, gestionnaire de clusters ou catalogue des mods. Les contrôles de base sont testés avec des fichiers et services simulés ; une installation et une connexion ARK réelles restent nécessaires pour valider chaque environnement.
 
 ## Développement
 
@@ -136,3 +136,13 @@ Organisation : `src/model.rs` pour les profils et fichiers, `catalog.rs` pour le
 3. Créer et pousser un tag correspondant, par exemple `v1.0.0`.
 
 Le workflow GitHub Actions compile et teste sous Windows, puis publie le binaire, le manifeste avec SHA-256 et l’archive d’installation. Le SHA de la compilation provient de `github.sha`. Les données locales, jetons, dossiers de serveurs et outils de compilation ne font pas partie des sources publiées.
+
+## SteamCMD, versions ASA et performances
+
+Le sélecteur de dossier Windows permet de choisir un disque et un emplacement pour SteamCMD ou un serveur. Il s’ouvre sur la machine qui héberge le panneau, y compris lors d’un accès distant par Tailscale. **Installer SteamCMD** télécharge l’outil officiel Valve dans le dossier choisi puis l’initialise. Une console Windows facultative et le terminal web affichent les journaux.
+
+Chaque serveur propose **Vérifier la version ASA**, sans télécharger les fichiers du jeu, puis une confirmation distincte pour appliquer la mise à jour. Le serveur doit être arrêté pour modifier ses fichiers. La comparaison utilise le Build ID Steam de la branche publique, différent du numéro de patch affiché en jeu ; une vérification récente est requise pour confirmer.
+
+L’installation utilise `+login anonymous +app_update 2430930 validate` : l’application dédiée ASA est accessible sans compte Steam possédant le jeu. Source : [Dedicated Server Setup](https://ark.wiki.gg/wiki/Dedicated_Server_Setup).
+
+Le tableau de bord relève toutes les deux secondes le CPU, la mémoire, l’espace et les débits des disques, ainsi que les débits réseau de la machine Windows hôte. Les interfaces réseau sont sélectionnables ; un total incluant une interface VPN peut compter plusieurs fois le même trafic. Le lancement ouvre les journaux du serveur ; un processus actif ne garantit pas encore une connexion en jeu.

@@ -1,5 +1,13 @@
 # Modifications
 
+## 1.2.0 — 25 novembre 2026
+
+- Sélection native de dossiers Windows pour SteamCMD et les serveurs, y compris sur un autre disque.
+- Installation et initialisation de SteamCMD avec console Windows facultative et terminal de diagnostic web.
+- Vérification du build public ASA distincte de la confirmation de mise à jour ; connexion Steam anonyme.
+- Mesures CPU, RAM, espace disque, débits disque et réseau de la machine hôte.
+- Lancement du serveur avec accès direct aux journaux ; suivi des tâches SteamCMD après redémarrage du panneau.
+
 ## 1.1.0 — 23 novembre 2026
 
 - Sélection des dix cartes ASA disponibles par nom lisible, conservation du code de lancement et option de carte personnalisée.

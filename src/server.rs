@@ -37,6 +37,7 @@ pub struct App {
     shutdown: Notify,
     update_busy: AtomicBool,
     steam_busy: AtomicBool,
+    metrics: crate::metrics::Metrics,
 }
 type Shared = Arc<App>;
 fn failure(message: impl ToString) -> (StatusCode, Json<Value>) {
@@ -162,6 +163,7 @@ pub async fn serve() -> Result<(), String> {
         shutdown: Notify::new(),
         update_busy: AtomicBool::new(false),
         steam_busy: AtomicBool::new(false),
+        metrics: crate::metrics::start(),
     });
     let background = app.clone();
     tokio::spawn(async move {
@@ -221,21 +223,65 @@ fn idle(core: &mut Core, p: &Profile) -> Result<(), String> {
 }
 async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
     let action = field(&input, "action")?;
+    if action == "metrics" {
+        return Ok(app
+            .metrics
+            .read()
+            .map_err(|_| "Mesures indisponibles")?
+            .clone());
+    }
+    if action == "browseDirectory" {
+        let initial = input["initial"].as_str().unwrap_or("").to_string();
+        let selected =
+            tokio::task::spawn_blocking(move || crate::steamcmd::pick_directory(&initial))
+                .await
+                .map_err(|e| e.to_string())??;
+        return Ok(json!({"directory":selected,"cancelled":selected.is_none()}));
+    }
     if action == "catalog" {
         return Ok(json!({"maps":crate::catalog::MAPS,"mapCatalogDate":"2026-11-23"}));
     }
     if action == "steamcmdStatus" {
-        let core = app.core.lock().await;
+        let mut core = app.core.lock().await;
         let configured = input["path"].as_str().unwrap_or(&core.settings.steamcmd);
         let mut result = crate::steamcmd::status(configured, &app.data);
-        result["installing"] = json!(app.steam_busy.load(Ordering::SeqCst));
-        result["installation"] = core.steam_install.clone();
+        let init_job = core.manager.job_status("_steamcmd");
+        result["installing"] =
+            json!(app.steam_busy.load(Ordering::SeqCst) || init_job["running"] == true);
+        result["installation"] = if (core.steam_install["phase"] == "init"
+            || core.steam_install.is_null())
+            && init_job.is_object()
+            && !app.steam_busy.load(Ordering::SeqCst)
+        {
+            init_job
+        } else {
+            core.steam_install.clone()
+        };
+        result["logs"] = json!(crate::console::tail(
+            &crate::manager::steam_log_path(&app.data, "_steamcmd"),
+            64 * 1024
+        ));
         return Ok(result);
     }
     if action == "installSteamcmd" {
         if app.update_busy.load(Ordering::SeqCst) {
             return Err("Attendre la fin de la mise à jour du panneau.".into());
         }
+        let directory = if let Some(dir) = input["directory"].as_str() {
+            PathBuf::from(dir)
+        } else {
+            crate::steamcmd::managed_path(&app.data)
+                .parent()
+                .unwrap()
+                .to_path_buf()
+        };
+        crate::steamcmd::validate_directory(&directory)?;
+        let app_data = app.data.canonicalize().unwrap_or(app.data.clone());
+        let chosen = directory.canonicalize().unwrap_or(directory.clone());
+        if chosen == app_data || app_data.starts_with(&chosen) {
+            return Err("Choisissez un sous-dossier dédié à SteamCMD, distinct de la racine des données du panneau.".into());
+        }
+        let visible = input["openConsole"].as_bool().unwrap_or(true);
         if app.steam_busy.swap(true, Ordering::SeqCst) {
             return Err("SteamCMD est déjà en cours de téléchargement.".into());
         }
@@ -248,21 +294,38 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
                         .into(),
                 );
             }
-            core.steam_install =
-                json!({"running":true,"message":"Téléchargement de SteamCMD depuis Valve…"});
+            let normalized = |p: &Path| p.to_string_lossy().replace('/', "\\").to_lowercase();
+            let chosen = PathBuf::from(normalized(&directory));
+            if core.settings.profiles.iter().any(|p| {
+                let server = PathBuf::from(normalized(Path::new(&p.directory)));
+                chosen.starts_with(&server) || server.starts_with(&chosen)
+            }) {
+                app.steam_busy.store(false, Ordering::SeqCst);
+                return Err(
+                    "Le dossier SteamCMD doit être distinct des dossiers de serveurs.".into(),
+                );
+            }
+            core.steam_install = json!({"running":true,"phase":"download","message":"Téléchargement de SteamCMD depuis Valve…"});
         }
         let background = app.clone();
         tokio::spawn(async move {
-            let result = crate::steamcmd::download(&background.data).await;
+            let result = crate::steamcmd::download_to(&directory).await;
             let mut core = background.core.lock().await;
             let result = result.and_then(|path| {
                 let mut next = core.settings.clone();
                 next.steamcmd = path.to_string_lossy().into();
                 model::save(&background.data.join("settings.json"), &next)?;
                 core.settings = next;
+                core.manager.steam_job(
+                    "_steamcmd",
+                    "init",
+                    &path.to_string_lossy(),
+                    None,
+                    visible,
+                )?;
                 Ok(())
             });
-            core.steam_install = json!({"running":false,"success":result.is_ok(),"message":result.map(|_|"SteamCMD installé. Ses composants seront initialisés au premier lancement d’une installation de serveur.".to_string()).unwrap_or_else(|e|e)});
+            core.steam_install = json!({"running":result.is_ok(),"phase":if result.is_ok(){"init"}else{"failed"},"success":if result.is_ok(){Value::Null}else{json!(false)},"message":result.map(|_|"SteamCMD téléchargé. Initialisation en cours : consultez le terminal.".to_string()).unwrap_or_else(|e|e)});
             background.steam_busy.store(false, Ordering::SeqCst);
         });
         return Ok(
@@ -330,8 +393,9 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
                 core.manager.discover(&p);
                 let running = core.manager.running(&p.id);
                 let job = core.manager.job_status(&p.id);
+                let version = crate::versions::view(&app.data, &p, &job);
                 let operation = core.operations.get(&p.id).cloned();
-                rows.push(json!({"profile":p,"running":running,"job":job,"operation":operation}));
+                rows.push(json!({"profile":p,"running":running,"job":job,"operation":operation,"serverVersion":version,"executablePresent":crate::manager::executable(&p).is_file()}));
             }
             return Ok(
                 json!({"version":updates::VERSION,"revision":updates::REVISION,"profiles":rows,"settings":{"repository":core.settings.repository,"branch":core.settings.branch,"steamcmd":core.settings.steamcmd},"updates":core.updates,"updateBusy":app.update_busy.load(Ordering::SeqCst),"steamInstalling":app.steam_busy.load(Ordering::SeqCst),"dataDirectory":app.data,"lastUpdate":model::load::<Value>(&app.data.join("last-update.json")).unwrap_or(Value::Null)}),
@@ -341,7 +405,7 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
             return Err("Mise à jour du panneau en cours.".into());
         }
         if action == "saveSettings" {
-            if app.steam_busy.load(Ordering::SeqCst) {
+            if app.steam_busy.load(Ordering::SeqCst) || core.manager.any_busy() {
                 return Err(
                     "Attendre la fin de l’installation SteamCMD avant de modifier son chemin."
                         .into(),
@@ -408,6 +472,25 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
         if action == "readTuning" {
             return crate::config::read(&p);
         }
+        if action == "checkServerVersion" {
+            if app.steam_busy.load(Ordering::SeqCst) || core.manager.any_busy() {
+                return Err("Attendre la fin de l’opération SteamCMD en cours.".into());
+            }
+            let detected = crate::steamcmd::status(&core.settings.steamcmd, &app.data);
+            let steam = detected["path"]
+                .as_str()
+                .ok_or("Installez SteamCMD avant de vérifier la version.")?;
+            core.manager.steam_job(
+                id,
+                "check",
+                steam,
+                None,
+                input["openConsole"].as_bool().unwrap_or(true),
+            )?;
+            return Ok(
+                json!({"message":"Vérification du dernier build public Steam ASA. Les fichiers du serveur ne seront pas mis à jour."}),
+            );
+        }
         if action == "rcon" || action == "stop" {
             core.manager.discover(&p);
             if core.manager.busy(id)
@@ -461,9 +544,36 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
                     model::save(&app.data.join("settings.json"), &next)?;
                     core.settings = next;
                 }
-                core.manager.install(&p, &steam)?;
+                core.manager
+                    .install(&p, &steam, input["openConsole"].as_bool().unwrap_or(true))?;
                 Ok(
                     json!({"message":"SteamCMD lancé. Consultez les journaux pour suivre le téléchargement."}),
+                )
+            }
+            "confirmServerUpdate" => {
+                if app.steam_busy.load(Ordering::SeqCst) || core.manager.any_busy() {
+                    return Err("Une opération SteamCMD est déjà en cours.".into());
+                }
+                let checked = model::load::<Value>(&crate::versions::cache_path(&app.data, id))?;
+                if checked["buildId"].as_str() != input["checkedBuild"].as_str()
+                    || checked["buildId"].is_null()
+                    || crate::now().saturating_sub(checked["checkedAt"].as_u64().unwrap_or(0))
+                        > 1800
+                {
+                    return Err("Vérifiez de nouveau la version du serveur avant de confirmer la mise à jour.".into());
+                }
+                let detected = crate::steamcmd::status(&core.settings.steamcmd, &app.data);
+                let steam = detected["path"].as_str().ok_or("SteamCMD introuvable.")?;
+                fs::create_dir_all(&p.directory).map_err(|e| e.to_string())?;
+                core.manager.steam_job(
+                    id,
+                    "update",
+                    steam,
+                    Some(Path::new(&p.directory)),
+                    input["openConsole"].as_bool().unwrap_or(true),
+                )?;
+                Ok(
+                    json!({"message":"Mise à jour du serveur confirmée et démarrée. Consultez le terminal."}),
                 )
             }
             "saveConfig" => {
@@ -623,6 +733,7 @@ mod http_tests {
             shutdown: Notify::new(),
             update_busy: AtomicBool::new(false),
             steam_busy: AtomicBool::new(false),
+            metrics: crate::metrics::empty(),
         });
         let service =
             tokio::spawn(async move { axum::serve(listener, router(app)).await.unwrap() });
