@@ -1,5 +1,11 @@
 # Modifications
 
+## 1.2.1 — 25 novembre 2026
+
+- Rafraîchissement des informations ASA avant installation ; nouvelle tentative unique pour l’erreur SteamCMD « Missing configuration », avec diagnostic explicite si elle persiste.
+- Prise en charge du redémarrage de SteamCMD après sa propre mise à jour pendant une vérification ou installation.
+- Console Windows conservée jusqu’à Entrée, accents UTF-8 et résultat final conservé dans le terminal web.
+
 ## 1.2.0 — 25 novembre 2026
 
 - Sélection native de dossiers Windows pour SteamCMD et les serveurs, y compris sur un autre disque.

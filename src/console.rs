@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::{
     fs,
-    io::{Read, Write},
+    io::{BufRead, Read, Write},
     path::{Path, PathBuf},
     process::{Child, Command, Stdio},
     sync::{Arc, Mutex},
@@ -47,6 +47,10 @@ pub fn args(kind: &str, directory: Option<&Path>) -> Result<Vec<String>, String>
                 directory.to_string_lossy().into(),
                 "+login".into(),
                 "anonymous".into(),
+                "+app_info_update".into(),
+                "1".into(),
+                "+app_info_print".into(),
+                "2430930".into(),
                 "+app_update".into(),
                 "2430930".into(),
                 "validate".into(),
@@ -134,12 +138,14 @@ pub fn execute(file: &Path) -> Result<(), String> {
         use std::os::windows::io::IntoRawHandle;
         unsafe extern "system" {
             fn SetStdHandle(which: u32, handle: *mut std::ffi::c_void) -> i32;
+            fn SetConsoleOutputCP(code: u32) -> i32;
         }
         if let Ok(output) = fs::OpenOptions::new().write(true).open("CONOUT$") {
             let handle = output.into_raw_handle();
             unsafe {
                 SetStdHandle(-11i32 as u32, handle);
                 SetStdHandle(-12i32 as u32, handle);
+                SetConsoleOutputCP(65001);
             }
         }
     }
@@ -153,15 +159,22 @@ pub fn execute(file: &Path) -> Result<(), String> {
     result["kind"] = json!(spec.kind);
     result["finishedAt"] = json!(crate::now());
     crate::model::save(&spec.result, &result)?;
-    println!(
-        "\n=== {} ===",
+    let summary = format!(
+        "\n=== {} ===\n",
         result["message"].as_str().unwrap_or("Tâche terminée")
     );
+    print!("{summary}");
+    if let Ok(mut log) = fs::OpenOptions::new().append(true).open(&spec.log) {
+        let _ = log.write_all(summary.as_bytes());
+    }
     if spec.visible {
         println!(
-            "Cette fenêtre se fermera dans 8 secondes. Le journal reste disponible dans le panneau web."
+            "Opération terminée. Appuyez sur Entrée pour fermer cette fenêtre.\nLe résultat et le journal restent disponibles dans le panneau web."
         );
-        std::thread::sleep(Duration::from_secs(8));
+        #[cfg(windows)]
+        if let Ok(input) = fs::File::open("CONIN$") {
+            let _ = std::io::BufReader::new(input).read_line(&mut String::new());
+        }
     }
     Ok(())
 }
@@ -189,7 +202,9 @@ fn execute_job(spec: &JobSpec) -> Result<Value, String> {
     let log = Arc::new(Mutex::new(output));
     let started = Instant::now();
     let mut retries = 0;
+    let mut configuration_retry = false;
     let status = loop {
+        let attempt_start = fs::metadata(&spec.log).map(|m| m.len()).unwrap_or(0);
         let mut command = Command::new(&spec.steamcmd);
         command
             .args(&args)
@@ -227,9 +242,30 @@ fn execute_job(spec: &JobSpec) -> Result<Value, String> {
         };
         let _ = stdout.join();
         let _ = stderr.join();
-        if spec.kind == "init" && status.code() == Some(7) && retries < 2 {
+        let attempt_bytes = fs::metadata(&spec.log)
+            .map(|m| m.len().saturating_sub(attempt_start))
+            .unwrap_or(0);
+        let transcript = tail(&spec.log, attempt_bytes.min(2 * 1024 * 1024));
+        if status.code() == Some(7)
+            && retries < 2
+            && (spec.kind == "init" || transcript.contains("Update complete, launching"))
+        {
             retries += 1;
             let message = "\nSteamCMD mis à jour : redémarrage de son initialisation.\n";
+            print!("{message}");
+            if let Ok(mut output) = log.lock() {
+                let _ = output.write_all(message.as_bytes());
+            }
+            continue;
+        }
+        if matches!(spec.kind.as_str(), "install" | "update")
+            && transcript.contains("Missing configuration")
+        {
+            if configuration_retry {
+                return Err("SteamCMD ne trouve toujours pas la configuration ASA après rafraîchissement et deux tentatives. Aucun succès d’installation n’est confirmé. Consultez le terminal et les journaux SteamCMD appinfo_log.txt / content_log.txt.".into());
+            }
+            configuration_retry = true;
+            let message = "\nSteamCMD : configuration ASA manquante. Nouvelle tentative unique avec rafraîchissement des informations Steam.\n";
             print!("{message}");
             if let Ok(mut output) = log.lock() {
                 let _ = output.write_all(message.as_bytes());
@@ -272,6 +308,10 @@ mod tests {
         assert!(!check.iter().any(|a| a == "+app_update"));
         assert!(check.iter().any(|a| a == "anonymous"));
         let install = args("install", Some(&dir)).unwrap();
+        assert!(
+            install.iter().position(|a| a == "+app_info_print").unwrap()
+                < install.iter().position(|a| a == "+app_update").unwrap()
+        );
         assert!(install.iter().any(|a| a == "2430930"));
         assert!(!install.iter().any(|a| a == "2399830"));
         assert!(install.iter().any(|a| a == &dir.to_string_lossy()));
