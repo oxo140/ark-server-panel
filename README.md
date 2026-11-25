@@ -139,10 +139,19 @@ Le workflow GitHub Actions compile et teste sous Windows, puis publie le binaire
 
 ## SteamCMD, versions ASA et performances
 
-Le sélecteur de dossier Windows permet de choisir un disque et un emplacement pour SteamCMD ou un serveur. Il s’ouvre sur la machine qui héberge le panneau, y compris lors d’un accès distant par Tailscale. **Installer SteamCMD** télécharge l’outil officiel Valve dans le dossier choisi puis l’initialise. Une console Windows facultative et le terminal web affichent les journaux.
+Le sélecteur de dossier Windows permet de choisir un disque et un emplacement pour SteamCMD ou un serveur. Il s’ouvre sur la machine qui héberge le panneau, y compris lors d’un accès distant par Tailscale. **Installer SteamCMD** télécharge l’outil officiel Valve dans le dossier choisi puis l’initialise. Les tâches SteamCMD tournent sans fenêtre CMD. La progression et les diagnostics restent accessibles dans la page web.
 
 Chaque serveur propose **Vérifier la version ASA**, sans télécharger les fichiers du jeu, puis une confirmation distincte pour appliquer la mise à jour. Le serveur doit être arrêté pour modifier ses fichiers. La comparaison utilise le Build ID Steam de la branche publique, différent du numéro de patch affiché en jeu ; une vérification récente est requise pour confirmer.
 
 L’installation utilise `+login anonymous +app_update 2430930 validate` : l’application dédiée ASA est accessible sans compte Steam possédant le jeu. Source : [Dedicated Server Setup](https://ark.wiki.gg/wiki/Dedicated_Server_Setup).
 
 Le tableau de bord relève toutes les deux secondes le CPU, la mémoire, l’espace et les débits des disques, ainsi que les débits réseau de la machine Windows hôte. Les interfaces réseau sont sélectionnables ; un total incluant une interface VPN peut compter plusieurs fois le même trafic. Le lancement ouvre les journaux du serveur ; un processus actif ne garantit pas encore une connexion en jeu.
+
+
+## Zone de notification et démarrage Windows
+
+Une icône ARK apparaît près de l’horloge Windows (éventuellement dans les icônes masquées). Un double-clic ou le menu **Ouvrir ARK Server Panel** rouvre le navigateur. **Quitter le panneau** conserve les processus ARK ; la fermeture est refusée pendant une opération de fichiers ou SteamCMD. L’icône est recréée après un redémarrage d’Explorer ou une mise à jour du panneau.
+
+Dans les paramètres, **Activer le démarrage automatique** ajoute un script appartenant au panneau dans le dossier Démarrage de l’utilisateur Windows. Il relance le panneau en arrière-plan à l’ouverture de session, avec les mêmes données, adresse et port, sans ouvrir le navigateur. Le bouton inverse retire cette entrée. Les serveurs ARK continuent à être lancés manuellement. Cette fonction utilise Windows Script Host et ne demande pas de droits administrateur.
+
+La vérification de version ASA ne télécharge pas les fichiers du serveur. La barre reste animée tant que Steam ne fournit pas de mesure ; elle affiche le build public à la fin. Pour une installation ou validation, le pourcentage provient des lignes de progression SteamCMD et concerne l’étape en cours. Les détails techniques sont repliés sous **Afficher les diagnostics détaillés**.

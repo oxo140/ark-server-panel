@@ -1,5 +1,13 @@
 # Modifications
 
+## 1.3.0 — 25 novembre 2026
+
+- Tâches SteamCMD sans fenêtre CMD, progression dans l’interface web et résultat explicite pour la vérification du build ASA.
+- Barre animée pendant les étapes sans mesure, pourcentage réel des fichiers lorsque SteamCMD le fournit, diagnostics détaillés repliables.
+- Icône de notification Windows native en Rust : ouverture du panneau, menu de fermeture et réapparition après redémarrage d’Explorer.
+- Bouton d’activation/désactivation du démarrage à l’ouverture de session Windows, avec conservation des données et du port.
+
+
 ## 1.2.1 — 25 novembre 2026
 
 - Rafraîchissement des informations ASA avant installation ; nouvelle tentative unique pour l’erreur SteamCMD « Missing configuration », avec diagnostic explicite si elle persiste.

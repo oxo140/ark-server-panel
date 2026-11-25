@@ -52,6 +52,10 @@ pub async fn supervise() -> Result<(), String> {
         let spawn_result = hidden(
             Command::new(&target.executable)
                 .arg("--serve")
+                .env(
+                    "ARK_PANEL_LAUNCHER",
+                    std::env::current_exe().map_err(|e| e.to_string())?,
+                )
                 .env("ARK_PANEL_BOOT", &boot),
         )
         .stdin(Stdio::null())
@@ -118,7 +122,9 @@ pub async fn supervise() -> Result<(), String> {
         let token = fs::read_to_string(dir.join("access-key.txt")).map_err(|e| e.to_string())?;
         let url = format!("http://{bind}:{port}/#{}", token.trim());
         println!("Panneau prêt : http://{bind}:{port}/");
-        if std::env::var("ARK_PANEL_NO_BROWSER").is_err() {
+        if std::env::var("ARK_PANEL_NO_BROWSER").is_err()
+            && !std::env::args().any(|a| a == "--background")
+        {
             open_browser(&url);
         }
         let status = tokio::task::spawn_blocking(move || child.wait())
@@ -130,7 +136,7 @@ pub async fn supervise() -> Result<(), String> {
         }
     }
 }
-fn open_browser(url: &str) {
+pub fn open_browser(url: &str) {
     #[cfg(windows)]
     {
         let _ =

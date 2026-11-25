@@ -4,10 +4,13 @@ mod console;
 mod manager;
 mod metrics;
 mod model;
+mod progress;
 mod rcon;
 mod server;
+mod startup;
 mod steamcmd;
 mod supervisor;
+mod tray;
 mod updates;
 mod versions;
 

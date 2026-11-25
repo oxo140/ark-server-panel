@@ -173,6 +173,21 @@ pub async fn serve() -> Result<(), String> {
         }
     });
     let shutdown = app.clone();
+    if std::env::var("ARK_PANEL_NO_TRAY").is_err() {
+        let tray_app = app.clone();
+        let runtime = tokio::runtime::Handle::current();
+        crate::tray::start(
+            format!("http://{}/#{}", app.host, app.token),
+            Arc::new(move || {
+                let app = tray_app.clone();
+                runtime.spawn(async move {
+                    if let Err(e) = dispatch(app, json!({"action":"quitPanel"})).await {
+                        eprintln!("Fermeture refusée : {e}");
+                    }
+                });
+            }),
+        );
+    }
     axum::serve(listener, router(app))
         .with_graceful_shutdown(async move {
             shutdown.shutdown.notified().await;
@@ -223,6 +238,38 @@ fn idle(core: &mut Core, p: &Profile) -> Result<(), String> {
 }
 async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
     let action = field(&input, "action")?;
+    if action == "startupStatus" {
+        let mut value = crate::startup::status();
+        value["trayActive"] = json!(crate::tray::active());
+        return Ok(value);
+    }
+    if action == "setStartup" {
+        return crate::startup::configure(
+            &app.data,
+            input["enabled"]
+                .as_bool()
+                .ok_or("Choix de démarrage requis")?,
+        );
+    }
+    if action == "quitPanel" {
+        let mut core = app.core.lock().await;
+        if app.update_busy.load(Ordering::SeqCst)
+            || app.steam_busy.load(Ordering::SeqCst)
+            || core.manager.any_busy()
+            || core.operations.values().any(|v| v["running"] == true)
+        {
+            return Err(
+                "Une opération est en cours. Attendez sa fin pour quitter le panneau.".into(),
+            );
+        }
+        tokio::spawn(async {
+            tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+            crate::tray::stop();
+            tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+            std::process::exit(0);
+        });
+        return Ok(json!({"message":"Fermeture du panneau. Les serveurs ARK restent actifs."}));
+    }
     if action == "metrics" {
         return Ok(app
             .metrics
@@ -261,6 +308,10 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
             &crate::manager::steam_log_path(&app.data, "_steamcmd"),
             64 * 1024
         ));
+        result["progress"] = crate::progress::progress(
+            result["logs"].as_str().unwrap_or(""),
+            &result["installation"],
+        );
         return Ok(result);
     }
     if action == "installSteamcmd" {
@@ -281,7 +332,7 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
         if chosen == app_data || app_data.starts_with(&chosen) {
             return Err("Choisissez un sous-dossier dédié à SteamCMD, distinct de la racine des données du panneau.".into());
         }
-        let visible = input["openConsole"].as_bool().unwrap_or(true);
+        let visible = false;
         if app.steam_busy.swap(true, Ordering::SeqCst) {
             return Err("SteamCMD est déjà en cours de téléchargement.".into());
         }
@@ -452,7 +503,11 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
         let p = profile(&core, id)?;
         model::validate_profile(&p, &core.settings.profiles, &app.data)?;
         if action == "logs" {
-            return Ok(json!({"text":core.manager.logs(&p)?}));
+            let text = core.manager.logs(&p)?;
+            let job = core.manager.job_status(&p.id);
+            let steam =
+                crate::console::tail(&crate::manager::steam_log_path(&app.data, &p.id), 64 * 1024);
+            return Ok(json!({"text":text,"progress":crate::progress::progress(&steam,&job)}));
         }
         if action == "readConfig" {
             let file = model::ini_path(&p, field(&input, "file")?)?;
@@ -480,13 +535,7 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
             let steam = detected["path"]
                 .as_str()
                 .ok_or("Installez SteamCMD avant de vérifier la version.")?;
-            core.manager.steam_job(
-                id,
-                "check",
-                steam,
-                None,
-                input["openConsole"].as_bool().unwrap_or(true),
-            )?;
+            core.manager.steam_job(id, "check", steam, None, false)?;
             return Ok(
                 json!({"message":"Vérification du dernier build public Steam ASA. Les fichiers du serveur ne seront pas mis à jour."}),
             );
@@ -544,8 +593,7 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
                     model::save(&app.data.join("settings.json"), &next)?;
                     core.settings = next;
                 }
-                core.manager
-                    .install(&p, &steam, input["openConsole"].as_bool().unwrap_or(true))?;
+                core.manager.install(&p, &steam, false)?;
                 Ok(
                     json!({"message":"SteamCMD lancé. Consultez les journaux pour suivre le téléchargement."}),
                 )
@@ -570,7 +618,7 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
                     "update",
                     steam,
                     Some(Path::new(&p.directory)),
-                    input["openConsole"].as_bool().unwrap_or(true),
+                    false,
                 )?;
                 Ok(
                     json!({"message":"Mise à jour du serveur confirmée et démarrée. Consultez le terminal."}),
