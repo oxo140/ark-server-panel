@@ -1,5 +1,10 @@
 # Modifications
 
+## 1.3.1 — 25 novembre 2026
+
+- Ligne CPU, RAM, débits disque et réseau sous les barres de progression ASA et SteamCMD, actualisée toutes les deux secondes avec les mesures de la machine hôte.
+
+
 ## 1.3.0 — 25 novembre 2026
 
 - Tâches SteamCMD sans fenêtre CMD, progression dans l’interface web et résultat explicite pour la vérification du build ASA.
