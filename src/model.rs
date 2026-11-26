@@ -24,6 +24,16 @@ pub struct Settings {
     pub repository: String,
     pub branch: String,
     pub steamcmd: String,
+    #[serde(default)]
+    pub language: Language,
+}
+#[derive(Clone, Copy, Default, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Language {
+    #[default]
+    En,
+    Fr,
+    Es,
 }
 impl Default for Settings {
     fn default() -> Self {
@@ -32,7 +42,25 @@ impl Default for Settings {
             repository: "oxo140/ark-server-panel".into(),
             branch: "main".into(),
             steamcmd: String::new(),
+            language: Language::En,
         }
+    }
+}
+#[cfg(test)]
+mod language_tests {
+    #[test]
+    fn old_settings_default_to_english_and_only_supported_languages_load() {
+        let old = serde_json::json!({"profiles":[],"repository":"test/repo","branch":"main","steamcmd":""});
+        let settings: super::Settings = serde_json::from_value(old.clone()).unwrap();
+        assert_eq!(serde_json::to_value(settings.language).unwrap(), "en");
+        for language in ["en", "fr", "es"] {
+            let mut value = old.clone();
+            value["language"] = serde_json::json!(language);
+            assert!(serde_json::from_value::<super::Settings>(value).is_ok());
+        }
+        let mut invalid = old;
+        invalid["language"] = serde_json::json!("de");
+        assert!(serde_json::from_value::<super::Settings>(invalid).is_err());
     }
 }
 pub fn data_dir() -> PathBuf {

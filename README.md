@@ -1,5 +1,12 @@
 # ARK Server Panel
 
+### Version 2.0.0
+
+- Un seul réglage **Niveau maximum des dinos sauvages** remplace les deux curseurs de difficulté et la case de difficulté forcée dans l’éditeur guidé. Le chargement lit les anciens INI sans les modifier. À l’enregistrement de ce réglage, le panneau écrit les paramètres natifs correspondants et désactive la difficulté forcée concurrente. Les estimations Tek et Wyvernes/Rock Drakes restent affichées sous le curseur.
+- La difficulté affecte également la qualité du butin et certains équilibrages de combat : le réglage l’indique. Les dinos déjà apparus ne sont pas remplacés automatiquement.
+- Choix **English (default)**, **Français**, **Español** dans les paramètres. L’anglais est le choix par défaut, y compris pour les anciens paramètres sans langue. La préférence est enregistrée sur l’hôte et s’applique sans recharger la page. Les brouillons sont conservés lors du changement.
+- Les menus, réglages guidés, estimations, messages courants et formats de date/nombre sont localisés. Les noms de serveurs, clés techniques, valeurs INI, commandes et journaux bruts gardent leur contenu original. Le catalogue local est dans `web/translations.json` ; aucune API de traduction externe n’est utilisée.
+
 ### Version 1.9.0
 
 Un onglet **Tailscale** donne accès au site officiel, à un QR code de téléchargement généré localement en Rust, aux IP détectées et aux adresses de jeu avec leurs ports. Le QR ne contient ni clé du panneau, ni invitation au tailnet. L’installation et la connexion de l’appareil se font dans Tailscale.

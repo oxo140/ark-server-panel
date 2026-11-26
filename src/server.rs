@@ -101,6 +101,7 @@ async fn api(State(app): State<Shared>, headers: HeaderMap, Json(input): Json<Va
 }
 pub fn router(app: Shared) -> Router {
     Router::new()
+        .route("/i18n.js",get(||async{secure(format!("window.ARK_TRANSLATIONS={};\n{}",include_str!("../web/translations.json"),include_str!("../web/i18n.js")),Some("application/javascript; charset=utf-8"))}))
         .route("/tailscale-qr.svg",get(||async{secure(crate::tailscale::download_qr(),Some("image/svg+xml; charset=utf-8"))}))
         .route("/",get(||async{secure(Html(include_str!("../web/index.html")),None)}))
         .route("/app.js",get(||async{secure(include_str!("../web/app.js"),Some("application/javascript; charset=utf-8"))}))
@@ -258,6 +259,16 @@ fn idle(core: &mut Core, p: &Profile) -> Result<(), String> {
 }
 async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
     let action = field(&input, "action")?;
+    if action == "setLanguage" {
+        let language: model::Language = serde_json::from_value(input["language"].clone())
+            .map_err(|_| "Language must be en, fr or es.".to_string())?;
+        let mut core = app.core.lock().await;
+        let mut next = core.settings.clone();
+        next.language = language;
+        model::save(&app.data.join("settings.json"), &next)?;
+        core.settings = next;
+        return Ok(json!({"language":language}));
+    }
     if action == "tailscaleStatus" {
         let addresses: Vec<_> = crate::connections::candidates()
             .into_iter()
@@ -522,7 +533,7 @@ async fn dispatch(app: Shared, input: Value) -> Result<Value, String> {
                 rows.push(json!({"profile":p,"running":running,"resources":resources,"health":health,"job":job,"progress":progress,"connection":connection,"operation":operation,"serverVersion":version,"executablePresent":crate::manager::executable(&p).is_file()}));
             }
             return Ok(
-                json!({"version":updates::VERSION,"revision":updates::REVISION,"profiles":rows,"settings":{"repository":core.settings.repository,"branch":core.settings.branch,"steamcmd":core.settings.steamcmd},"updates":core.updates,"updateBusy":app.update_busy.load(Ordering::SeqCst),"steamInstalling":app.steam_busy.load(Ordering::SeqCst),"dataDirectory":app.data,"lastUpdate":model::load::<Value>(&app.data.join("last-update.json")).unwrap_or(Value::Null)}),
+                json!({"version":updates::VERSION,"revision":updates::REVISION,"profiles":rows,"settings":{"repository":core.settings.repository,"branch":core.settings.branch,"steamcmd":core.settings.steamcmd,"language":core.settings.language},"updates":core.updates,"updateBusy":app.update_busy.load(Ordering::SeqCst),"steamInstalling":app.steam_busy.load(Ordering::SeqCst),"dataDirectory":app.data,"lastUpdate":model::load::<Value>(&app.data.join("last-update.json")).unwrap_or(Value::Null)}),
             );
         }
         if app.update_busy.load(Ordering::SeqCst) {

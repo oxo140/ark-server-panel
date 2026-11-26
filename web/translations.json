@@ -1,0 +1,2326 @@
+{
+  "Bienvenue sur votre base.": [
+    "Welcome to your base.",
+    "Bienvenido a tu base."
+  ],
+  "Saisissez la clé d’accès du panneau. Le raccourci Windows vous connecte automatiquement.": [
+    "Enter the panel access key. The Windows shortcut signs you in automatically.",
+    "Introduce la clave de acceso del panel. El acceso directo de Windows inicia sesión automáticamente."
+  ],
+  "Clé d’accès": [
+    "Access key",
+    "Clave de acceso"
+  ],
+  "Se connecter": [
+    "Sign in",
+    "Iniciar sesión"
+  ],
+  "Clé locale :": [
+    "Local key:",
+    "Clave local:"
+  ],
+  "VOTRE INFRASTRUCTURE": [
+    "YOUR INFRASTRUCTURE",
+    "TU INFRAESTRUCTURA"
+  ],
+  "Vue d’ensemble": [
+    "Overview",
+    "Vista general"
+  ],
+  "Serveurs": [
+    "Servers",
+    "Servidores"
+  ],
+  "Paramètres & mises à jour": [
+    "Settings & updates",
+    "Ajustes y actualizaciones"
+  ],
+  "SERVEURS LANCÉS": [
+    "RUNNING SERVERS",
+    "SERVIDORES EN EJECUCIÓN"
+  ],
+  "Machine Windows": [
+    "Windows host",
+    "Equipo Windows"
+  ],
+  "Connexion locale": [
+    "Local connection",
+    "Conexión local"
+  ],
+  "Espace de contrôle": [
+    "Control panel",
+    "Panel de control"
+  ],
+  "Déconnexion": [
+    "Sign out",
+    "Cerrar sesión"
+  ],
+  "Performances de la machine hôte": [
+    "Host performance",
+    "Rendimiento del equipo anfitrión"
+  ],
+  "Première mesure en cours…": [
+    "Collecting the first sample…",
+    "Recopilando la primera muestra…"
+  ],
+  "Processeur": [
+    "CPU",
+    "Procesador"
+  ],
+  "Mémoire RAM": [
+    "RAM usage",
+    "Memoria RAM"
+  ],
+  "Activité des disques": [
+    "Disk activity",
+    "Actividad de discos"
+  ],
+  "Lecture / écriture par seconde": [
+    "Read / write per second",
+    "Lectura / escritura por segundo"
+  ],
+  "Réseau de l’hôte": [
+    "Host network",
+    "Red del equipo anfitrión"
+  ],
+  "Interfaces cumulées": [
+    "All interfaces combined",
+    "Todas las interfaces combinadas"
+  ],
+  "Réception / émission par seconde": [
+    "Receive / send per second",
+    "Recepción / envío por segundo"
+  ],
+  "Disques : espace libre et activité": [
+    "Disks: free space and activity",
+    "Discos: espacio libre y actividad"
+  ],
+  "Les débits sont échantillonnés sur la machine Windows hôte. Le cumul réseau peut compter à la fois une interface physique et un tunnel Tailscale.": [
+    "Rates are sampled on the Windows host. Network totals may count both a physical interface and a Tailscale tunnel.",
+    "Las tasas se miden en el equipo Windows. El total de red puede contar tanto la interfaz física como el túnel Tailscale."
+  ],
+  "VOTRE CLUSTER, EN UN COUP D’ŒIL": [
+    "YOUR CLUSTER AT A GLANCE",
+    "TU CLÚSTER DE UN VISTAZO"
+  ],
+  "Un seul point de contrôle pour vos mondes ARK.": [
+    "One control panel for your ARK worlds.",
+    "Un único panel para tus mundos ARK."
+  ],
+  "+ Ajouter un serveur": [
+    "+ Add server",
+    "+ Añadir servidor"
+  ],
+  "Serveurs configurés": [
+    "Configured servers",
+    "Servidores configurados"
+  ],
+  "Profils sur cette machine": [
+    "Profiles on this host",
+    "Perfiles en este equipo"
+  ],
+  "Processus actifs": [
+    "Active processes",
+    "Procesos activos"
+  ],
+  "Disponibilité en jeu à vérifier dans les journaux": [
+    "Check logs for in-game availability",
+    "Comprueba la disponibilidad en los registros"
+  ],
+  "Opérations en cours": [
+    "Operations in progress",
+    "Operaciones en curso"
+  ],
+  "SteamCMD, sauvegardes et restaurations": [
+    "SteamCMD, backups and restores",
+    "SteamCMD, copias de seguridad y restauraciones"
+  ],
+  "Historique · 10 dernières minutes": [
+    "History · last 10 minutes",
+    "Historial · últimos 10 minutos"
+  ],
+  "Enregistrement des premières mesures…": [
+    "Recording the first samples…",
+    "Registrando las primeras muestras…"
+  ],
+  "Machine hôte · réseau cumulé · survolez une courbe ou utilisez les flèches pour consulter une mesure.": [
+    "Host · combined network · hover over a chart or use the arrow keys to inspect a sample.",
+    "Equipo anfitrión · red combinada · sitúa el cursor sobre una gráfica o usa las flechas para consultar una muestra."
+  ],
+  "Vos serveurs": [
+    "Your servers",
+    "Tus servidores"
+  ],
+  "Actualisation toutes les 5 secondes": [
+    "Refreshes every 5 seconds",
+    "Se actualiza cada 5 segundos"
+  ],
+  "UN PANNEAU WEB. VOTRE MACHINE.": [
+    "A WEB PANEL. YOUR MACHINE.",
+    "UN PANEL WEB. TU EQUIPO."
+  ],
+  "Vos serveurs continuent de tourner.": [
+    "Your servers keep running.",
+    "Tus servidores siguen funcionando."
+  ],
+  "Fermer cet onglet n’arrête ni les processus ARK ni le panneau.": [
+    "Closing this tab does not stop ARK or the panel.",
+    "Cerrar esta pestaña no detiene ARK ni el panel."
+  ],
+  "GESTION DES MONDES": [
+    "WORLD MANAGEMENT",
+    "GESTIÓN DE MUNDOS"
+  ],
+  "Installation, configuration et contrôle de chaque instance.": [
+    "Install, configure and control each instance.",
+    "Instala, configura y controla cada instancia."
+  ],
+  "Afficher les favoris": [
+    "Show favorites",
+    "Mostrar favoritos"
+  ],
+  "RÉSEAU PRIVÉ": [
+    "PRIVATE NETWORK",
+    "RED PRIVADA"
+  ],
+  "Rejoignez vos serveurs avec leur adresse 100.x.x.x et leur port de jeu.": [
+    "Join your servers using their 100.x.x.x address and game port.",
+    "Únete a tus servidores con su dirección 100.x.x.x y su puerto de juego."
+  ],
+  "Actualiser Tailscale": [
+    "Refresh Tailscale",
+    "Actualizar Tailscale"
+  ],
+  "Installer Tailscale": [
+    "Install Tailscale",
+    "Instalar Tailscale"
+  ],
+  "Scannez ce QR code pour ouvrir le site officiel et télécharger Tailscale sur votre appareil.": [
+    "Scan this QR code to open the official website and download Tailscale on your device.",
+    "Escanea este código QR para abrir la web oficial y descargar Tailscale en tu dispositivo."
+  ],
+  "Ouvrir le site officiel Tailscale": [
+    "Open the official Tailscale website",
+    "Abrir la web oficial de Tailscale"
+  ],
+  "Le QR code contient uniquement le lien de téléchargement. Il ne connecte aucun appareil à votre réseau.": [
+    "The QR code contains only the download link. It does not connect a device to your network.",
+    "El código QR solo contiene el enlace de descarga. No conecta ningún dispositivo a tu red."
+  ],
+  "Adresses de cette machine": [
+    "This host's addresses",
+    "Direcciones de este equipo"
+  ],
+  "Ouvrez cet onglet pour vérifier Tailscale.": [
+    "Open this tab to check Tailscale.",
+    "Abre esta pestaña para comprobar Tailscale."
+  ],
+  "Installez Tailscale sur la machine du serveur et sur le PC du joueur.": [
+    "Install Tailscale on the server host and the player's PC.",
+    "Instala Tailscale en el equipo servidor y en el PC del jugador."
+  ],
+  "Connectez les appareils au même réseau Tailscale, ou partagez la machine avec le joueur.": [
+    "Connect the devices to the same Tailscale network, or share the host with the player.",
+    "Conecta los dispositivos a la misma red Tailscale o comparte el equipo con el jugador."
+  ],
+  "Utilisez l’adresse complète du serveur avec son port de jeu, par exemple": [
+    "Use the full server address including its game port, for example",
+    "Usa la dirección completa del servidor con su puerto de juego, por ejemplo"
+  ],
+  "Les autorisations du réseau Tailscale et le pare-feu Windows doivent permettre le trafic du jeu. Détecter une IP ne prouve pas l’accès depuis un autre appareil.": [
+    "Tailscale permissions and Windows Firewall must allow game traffic. Detecting an IP does not prove access from another device.",
+    "Los permisos de Tailscale y el firewall de Windows deben permitir el tráfico del juego. Detectar una IP no demuestra el acceso desde otro dispositivo."
+  ],
+  "Mes adresses de jeu Tailscale": [
+    "My Tailscale game addresses",
+    "Mis direcciones de juego Tailscale"
+  ],
+  "CONFIGURATION DU PANNEAU": [
+    "PANEL SETTINGS",
+    "AJUSTES DEL PANEL"
+  ],
+  "Le programme évolue. Vos données restent sur votre machine.": [
+    "The software evolves. Your data stays on your machine.",
+    "El programa evoluciona. Tus datos permanecen en tu equipo."
+  ],
+  "Connexion au dépôt GitHub": [
+    "GitHub repository",
+    "Repositorio GitHub"
+  ],
+  "Dépôt public : aucun compte ni jeton nécessaire pour recevoir les mises à jour.": [
+    "Public repository: no account or token is needed to receive updates.",
+    "Repositorio público: no se necesita cuenta ni token para recibir actualizaciones."
+  ],
+  "Dépôt GitHub": [
+    "GitHub repository",
+    "Repositorio GitHub"
+  ],
+  "Branche": [
+    "Branch",
+    "Rama"
+  ],
+  "Chemin de SteamCMD": [
+    "SteamCMD path",
+    "Ruta de SteamCMD"
+  ],
+  "Choisir un dossier Windows": [
+    "Choose a Windows folder",
+    "Elegir una carpeta de Windows"
+  ],
+  "SteamCMD travaille en arrière-plan. La progression et les diagnostics restent dans cette page.": [
+    "SteamCMD runs in the background. Progress and diagnostics stay on this page.",
+    "SteamCMD funciona en segundo plano. El progreso y los diagnósticos se muestran en esta página."
+  ],
+  "Vérifier SteamCMD": [
+    "Check SteamCMD",
+    "Comprobar SteamCMD"
+  ],
+  "Enregistrer les paramètres": [
+    "Save settings",
+    "Guardar ajustes"
+  ],
+  "Version du panneau": [
+    "Panel version",
+    "Versión del panel"
+  ],
+  "Vérifier GitHub": [
+    "Check GitHub",
+    "Comprobar GitHub"
+  ],
+  "Télécharger la mise à jour": [
+    "Download update",
+    "Descargar actualización"
+  ],
+  "Redémarrer le panneau": [
+    "Restart panel",
+    "Reiniciar panel"
+  ],
+  "Vérification au démarrage et toutes les 12 heures. Installation manuelle, contrôle SHA-256 et retour à la version précédente en cas d’échec au démarrage.": [
+    "Checks on startup and every 12 hours. Manual installation, SHA-256 verification and rollback if startup fails.",
+    "Comprobación al iniciar y cada 12 horas. Instalación manual, verificación SHA-256 y reversión si falla el inicio."
+  ],
+  "Démarrage Windows": [
+    "Windows startup",
+    "Inicio de Windows"
+  ],
+  "Garder le panneau disponible dans la zone de notification, près de l’horloge. Le démarrage automatique concerne le panneau ; chaque serveur ARK se lance avec son bouton.": [
+    "Keep the panel in the notification area near the clock. Automatic startup applies to the panel; start each ARK server with its own button.",
+    "Mantén el panel en el área de notificación, junto al reloj. El inicio automático afecta al panel; cada servidor ARK se inicia con su botón."
+  ],
+  "Chargement…": [
+    "Loading…",
+    "Cargando…"
+  ],
+  "Données locales": [
+    "Local data",
+    "Datos locales"
+  ],
+  "Profils, clé d’accès, journaux, sauvegardes et versions sont conservés hors du dépôt Git. La V1 n’envoie aucune de ces données vers GitHub.": [
+    "Profiles, access key, logs, backups and versions are stored outside the Git repository. The panel does not send this data to GitHub.",
+    "Los perfiles, la clave de acceso, los registros, las copias y las versiones se guardan fuera del repositorio Git. El panel no envía estos datos a GitHub."
+  ],
+  "Pour Tailscale : lancer avec ARK_PANEL_BIND défini sur l’IP 100.x de cette machine. Accès protégé par la même clé. Aucun accès Internet public automatique.": [
+    "For Tailscale: set ARK_PANEL_BIND to this host's 100.x IP. Access uses the same key. Public Internet access is not enabled automatically.",
+    "Para Tailscale: configura ARK_PANEL_BIND con la IP 100.x de este equipo. Se usa la misma clave de acceso. No se habilita el acceso público a Internet automáticamente."
+  ],
+  "Indépendant · Windows · Rust": [
+    "Independent · Windows · Rust",
+    "Independiente · Windows · Rust"
+  ],
+  "CONNEXION ASA": [
+    "ASA CONNECTION",
+    "CONEXIÓN ASA"
+  ],
+  "Rejoindre le serveur": [
+    "Join server",
+    "Unirse al servidor"
+  ],
+  "Adresse du serveur avec port de jeu": [
+    "Server address with game port",
+    "Dirección del servidor con puerto de juego"
+  ],
+  "Le port de jeu de ce profil est ajouté automatiquement. Utilisez l’adresse Tailscale 100.x.x.x pour le tailnet. Une IP locale ou un nom DNS reste possible ; le port RCON ne sert pas à rejoindre le jeu.": [
+    "This profile's game port is added automatically. Use its Tailscale 100.x.x.x address for the tailnet. You may also use a LAN IP or DNS name; RCON is not the game port.",
+    "El puerto de juego del perfil se añade automáticamente. Usa la dirección Tailscale 100.x.x.x para la red privada. También puedes usar una IP local o un nombre DNS; RCON no es el puerto de juego."
+  ],
+  "Adresse de jeu :": [
+    "Game address:",
+    "Dirección de juego:"
+  ],
+  "Enregistrer cette adresse": [
+    "Save this address",
+    "Guardar esta dirección"
+  ],
+  "Rejoindre via Steam": [
+    "Join via Steam",
+    "Unirse mediante Steam"
+  ],
+  "Ce lien lance ASA avec une demande de connexion. Si le jeu reste au menu, activez l’accès console dans les paramètres avancés d’ASA et collez la commande ci-dessous dans sa console. Les favoris de ce panneau sont indépendants de ceux du jeu.": [
+    "This link launches ASA with a connection request. If it stays at the menu, enable console access in ASA's advanced settings and paste the command below. Panel favorites are separate from in-game favorites.",
+    "Este enlace inicia ASA con una solicitud de conexión. Si se queda en el menú, activa la consola en los ajustes avanzados de ASA y pega el comando de abajo. Los favoritos del panel son independientes de los del juego."
+  ],
+  "Commande de connexion directe": [
+    "Direct connection command",
+    "Comando de conexión directa"
+  ],
+  "Copier la commande": [
+    "Copy command",
+    "Copiar comando"
+  ],
+  "PROFIL DE SERVEUR": [
+    "SERVER PROFILE",
+    "PERFIL DEL SERVIDOR"
+  ],
+  "Ajouter un serveur": [
+    "Add server",
+    "Añadir servidor"
+  ],
+  "Nom du serveur": [
+    "Server name",
+    "Nombre del servidor"
+  ],
+  "Dossier dédié au serveur": [
+    "Dedicated server folder",
+    "Carpeta dedicada del servidor"
+  ],
+  "Un dossier différent pour chaque serveur. Un dossier existant est conservé.": [
+    "Use a different folder for each server. Existing folders are preserved.",
+    "Usa una carpeta diferente para cada servidor. Se conservan las carpetas existentes."
+  ],
+  "Carte": [
+    "Map",
+    "Mapa"
+  ],
+  "Choisissez une carte ASA ou une carte personnalisée.": [
+    "Choose an ASA or custom map.",
+    "Elige un mapa de ASA o un mapa personalizado."
+  ],
+  "Identifiant de la carte personnalisée": [
+    "Custom map identifier",
+    "Identificador del mapa personalizado"
+  ],
+  "Les identifiants des mods se renseignent plus bas.": [
+    "Enter mod IDs below.",
+    "Introduce los identificadores de mods más abajo."
+  ],
+  "Port de jeu · UDP": [
+    "Game port · UDP",
+    "Puerto de juego · UDP"
+  ],
+  "Port RCON · TCP": [
+    "RCON port · TCP",
+    "Puerto RCON · TCP"
+  ],
+  "Identifiants des mods": [
+    "Mod IDs",
+    "Identificadores de mods"
+  ],
+  "Facultatif. Identifiants séparés par des virgules.": [
+    "Optional. Comma-separated IDs.",
+    "Opcional. Identificadores separados por comas."
+  ],
+  "La création du profil ne lance pas le serveur. Les ports doivent aussi être autorisés dans le pare-feu Windows et Tailscale.": [
+    "Creating a profile does not start the server. Allow its ports in Windows Firewall and Tailscale.",
+    "Crear un perfil no inicia el servidor. Permite sus puertos en el firewall de Windows y en Tailscale."
+  ],
+  "Annuler": [
+    "Cancel",
+    "Cancelar"
+  ],
+  "Enregistrer le profil": [
+    "Save profile",
+    "Guardar perfil"
+  ],
+  "CONTRÔLE DU SERVEUR": [
+    "SERVER CONTROL",
+    "CONTROL DEL SERVIDOR"
+  ],
+  "Stats du serveur": [
+    "Server details",
+    "Detalles del servidor"
+  ],
+  "Journaux & RCON": [
+    "Logs & RCON",
+    "Registros y RCON"
+  ],
+  "Configuration INI": [
+    "INI configuration",
+    "Configuración INI"
+  ],
+  "Sauvegardes": [
+    "Backups",
+    "Copias de seguridad"
+  ],
+  "Planification": [
+    "Scheduling",
+    "Programación"
+  ],
+  "Test sans lancer le jeu : port UDP appartenant au processus ARK et annonce de disponibilité dans le journal, ou réponse RCON. RCON est facultatif. L’accès depuis un autre PC dépend aussi de Tailscale et du pare-feu.": [
+    "Test without launching the game: ARK owns the UDP port and has advertised readiness in its log, or RCON responds. RCON is optional. Access from another PC also depends on Tailscale and the firewall.",
+    "Prueba sin iniciar el juego: ARK tiene el puerto UDP y anuncia su disponibilidad en el registro, o responde RCON. RCON es opcional. El acceso desde otro PC también depende de Tailscale y del firewall."
+  ],
+  "Tester / actualiser": [
+    "Test / refresh",
+    "Probar / actualizar"
+  ],
+  "Derniers 48 Ko de chaque journal": [
+    "Last 48 KB of each log",
+    "Últimos 48 KB de cada registro"
+  ],
+  "Actualiser les journaux": [
+    "Refresh logs",
+    "Actualizar registros"
+  ],
+  "Disque": [
+    "Disk",
+    "Disco"
+  ],
+  "Réseau": [
+    "Network",
+    "Red"
+  ],
+  "Diagnostics détaillés": [
+    "Detailed diagnostics",
+    "Diagnósticos detallados"
+  ],
+  "Envoyer": [
+    "Send",
+    "Enviar"
+  ],
+  "RCONEnabled=True et ServerAdminPassword sont lus dans [ServerSettings] de GameUserSettings.ini.": [
+    "RCONEnabled=True and ServerAdminPassword are read from [ServerSettings] in GameUserSettings.ini.",
+    "RCONEnabled=True y ServerAdminPassword se leen de [ServerSettings] en GameUserSettings.ini."
+  ],
+  "Réglages guidés": [
+    "Guided settings",
+    "Ajustes guiados"
+  ],
+  "Édition texte INI": [
+    "Raw INI editor",
+    "Editor de texto INI"
+  ],
+  "Serveur arrêté pour enregistrer": [
+    "Stop the server before saving",
+    "Detén el servidor antes de guardar"
+  ],
+  "Mes profils de réglages": [
+    "My setting profiles",
+    "Mis perfiles de ajustes"
+  ],
+  "Exportez les réglages enregistrés pour les réutiliser sur un autre serveur. Les mots de passe et adresses sont exclus.": [
+    "Export saved settings to reuse them on another server. Passwords and addresses are excluded.",
+    "Exporta los ajustes guardados para usarlos en otro servidor. Se excluyen las contraseñas y direcciones."
+  ],
+  "Exporter mes réglages": [
+    "Export my settings",
+    "Exportar mis ajustes"
+  ],
+  "Importer un profil JSON": [
+    "Import a JSON profile",
+    "Importar un perfil JSON"
+  ],
+  "Lire un fichier INI / texte": [
+    "Read an INI / text file",
+    "Leer un archivo INI / texto"
+  ],
+  "Un INI est ouvert en brouillon dans l’éditeur texte. Choisissez le fichier cible et enregistrez pour actualiser les curseurs.": [
+    "An INI opens as a draft in the text editor. Choose the target file and save to update the sliders.",
+    "El INI se abre como borrador en el editor. Elige el archivo de destino y guarda para actualizar los controles."
+  ],
+  "Un ARK à votre rythme.": [
+    "ARK at your own pace.",
+    "ARK a tu ritmo."
+  ],
+  "Ajustez les taux avec les curseurs ou saisissez une valeur précise. Les changements restent en brouillon jusqu’à l’enregistrement.": [
+    "Adjust rates with the sliders or enter an exact value. Changes remain a draft until saved.",
+    "Ajusta las tasas con los controles o introduce un valor exacto. Los cambios son un borrador hasta que los guardes."
+  ],
+  "Bases PvE proposées à partir de retours de joueurs, sans consensus universel. Les bonus solo natifs sont désactivés dans ces profils. Les temps d’imprégnation dépendent de l’espèce : vérifiez leur compatibilité avec la croissance choisie.": [
+    "Suggested PvE baselines based on player feedback, not a universal standard. Native single-player bonuses are disabled. Imprinting depends on species: check compatibility with maturation speed.",
+    "Bases PvE sugeridas a partir de opiniones de jugadores, sin un consenso universal. Los bonos nativos de un jugador están desactivados. La impronta depende de la especie: comprueba su compatibilidad con la maduración."
+  ],
+  "Recharger": [
+    "Reload",
+    "Recargar"
+  ],
+  "Enregistrer les réglages": [
+    "Save settings",
+    "Guardar ajustes"
+  ],
+  "Charger": [
+    "Load",
+    "Cargar"
+  ],
+  "Enregistrer": [
+    "Save",
+    "Guardar"
+  ],
+  "Édition UTF-8 complète. Les réglages inconnus et les clés répétées sont conservés. Une copie de sécurité précède l’écriture.": [
+    "Full UTF-8 editing. Unknown settings and repeated keys are preserved. A backup is made before writing.",
+    "Edición UTF-8 completa. Se conservan los ajustes desconocidos y las claves repetidas. Se crea una copia antes de escribir."
+  ],
+  "Les sauvegardes et restaurations exigent un serveur arrêté. Le dossier Saved complet est copié et vérifié par empreintes. Aucune suppression automatique dans la V1.": [
+    "Backups and restores require a stopped server. The full Saved folder is copied and verified with hashes. No automatic deletion.",
+    "Las copias y restauraciones requieren detener el servidor. Se copia toda la carpeta Saved y se verifica con hashes. No hay eliminación automática."
+  ],
+  "Créer une sauvegarde": [
+    "Create backup",
+    "Crear copia de seguridad"
+  ],
+  "Actualiser": [
+    "Refresh",
+    "Actualizar"
+  ],
+  "Horaires locaux de la machine Windows. Le panneau doit rester actif. Après un horaire manqué, la tâche s’exécute au retour du panneau. Une sauvegarde complète interrompt proprement le serveur puis le relance s’il était actif.": [
+    "Times use the Windows host's local clock. Keep the panel running. Missed tasks run when it returns. A full backup stops the server gracefully, then restarts it if it was running.",
+    "Se usa la hora local del equipo Windows. Mantén el panel activo. Las tareas pendientes se ejecutan cuando vuelve el panel. Una copia completa detiene el servidor correctamente y lo reinicia si estaba activo."
+  ],
+  "Sauvegarde automatique du dossier Saved": [
+    "Automatic Saved folder backup",
+    "Copia automática de la carpeta Saved"
+  ],
+  "Toutes les (heures)": [
+    "Every (hours)",
+    "Cada (horas)"
+  ],
+  "Redémarrage quotidien": [
+    "Daily restart",
+    "Reinicio diario"
+  ],
+  "Heure du redémarrage": [
+    "Restart time",
+    "Hora del reinicio"
+  ],
+  "Vérifier et installer automatiquement les mises à jour ASA": [
+    "Automatically check and install ASA updates",
+    "Comprobar e instalar actualizaciones de ASA automáticamente"
+  ],
+  "Heure de vérification": [
+    "Check time",
+    "Hora de comprobación"
+  ],
+  "Arrêt et sauvegarde avant installation uniquement si le build change. RCON requis pour un serveur actif. Une mise à jour échouée laisse le serveur arrêté.": [
+    "Stop and back up before installation only if the build changes. A running server requires RCON. A failed update leaves the server stopped.",
+    "Se detiene y se crea una copia antes de instalar solo si cambia la compilación. Un servidor activo requiere RCON. Si falla la actualización, queda detenido."
+  ],
+  "Préavis en jeu (minutes)": [
+    "In-game warning (minutes)",
+    "Aviso en el juego (minutos)"
+  ],
+  "Message en jeu — {minutes} est remplacé automatiquement": [
+    "In-game message — {minutes} is replaced automatically",
+    "Mensaje en el juego — {minutes} se sustituye automáticamente"
+  ],
+  "Enregistrer la planification": [
+    "Save schedule",
+    "Guardar programación"
+  ],
+  "OUTIL D’INSTALLATION VALVE": [
+    "VALVE INSTALLATION TOOL",
+    "HERRAMIENTA DE INSTALACIÓN DE VALVE"
+  ],
+  "Préparer SteamCMD": [
+    "Set up SteamCMD",
+    "Preparar SteamCMD"
+  ],
+  "Téléchargement HTTPS depuis le serveur officiel Valve. Le panneau vérifie l’archive et le format de l’exécutable. Les composants SteamCMD se mettront à jour au premier lancement.": [
+    "HTTPS download from Valve's official server. The panel verifies the archive and executable format. SteamCMD components update on first launch.",
+    "Descarga HTTPS del servidor oficial de Valve. El panel verifica el archivo y el formato del ejecutable. Los componentes de SteamCMD se actualizan al iniciarse por primera vez."
+  ],
+  "Dossier géré par le panneau :": [
+    "Panel-managed folder:",
+    "Carpeta administrada por el panel:"
+  ],
+  "Dossier d’installation de SteamCMD": [
+    "SteamCMD installation folder",
+    "Carpeta de instalación de SteamCMD"
+  ],
+  "Parcourir les dossiers Windows": [
+    "Browse Windows folders",
+    "Explorar carpetas de Windows"
+  ],
+  "Le sélecteur s’ouvre sur la machine qui héberge le panneau. Vous pouvez aussi saisir le chemin d’un autre disque.": [
+    "The picker opens on the panel's host machine. You can also enter a path on another drive.",
+    "El selector se abre en el equipo que aloja el panel. También puedes escribir una ruta de otro disco."
+  ],
+  "Installer SteamCMD et ouvrir le diagnostic": [
+    "Install SteamCMD and open diagnostics",
+    "Instalar SteamCMD y abrir diagnósticos"
+  ],
+  "Continuer l’installation du serveur": [
+    "Continue server installation",
+    "Continuar instalación del servidor"
+  ],
+  "Choisir un autre emplacement": [
+    "Choose another location",
+    "Elegir otra ubicación"
+  ],
+  "Interface réseau": [
+    "Network interface",
+    "Interfaz de red"
+  ],
+  "Fermer": [
+    "Close",
+    "Cerrar"
+  ],
+  "Mon serveur The Island": [
+    "My The Island server",
+    "Mi servidor The Island"
+  ],
+  "Identifiant fourni par l’auteur de la carte": [
+    "Identifier supplied by the map author",
+    "Identificador proporcionado por el autor del mapa"
+  ],
+  "Progression SteamCMD": [
+    "SteamCMD progress",
+    "Progreso de SteamCMD"
+  ],
+  "Lecture / écriture cumulées des disques de la machine hôte": [
+    "Combined read / write of the host disks",
+    "Lectura / escritura combinada de los discos del equipo"
+  ],
+  "Réception / émission ; interface sélectionnée dans le tableau de bord": [
+    "Receive / send; interface selected on the dashboard",
+    "Recepción / envío; interfaz seleccionada en el panel"
+  ],
+  "Commande RCON, par exemple ListPlayers": [
+    "RCON command, e.g. ListPlayers",
+    "Comando RCON, por ejemplo ListPlayers"
+  ],
+  "Mode de configuration": [
+    "Configuration mode",
+    "Modo de configuración"
+  ],
+  "Rechercher : XP, apprivoisement, croissance…": [
+    "Search: XP, taming, maturation…",
+    "Buscar: XP, domesticación, maduración…"
+  ],
+  "Rechercher un réglage": [
+    "Search settings",
+    "Buscar un ajuste"
+  ],
+  "Contenu du fichier INI": [
+    "INI file content",
+    "Contenido del archivo INI"
+  ],
+  "Progression installation SteamCMD": [
+    "SteamCMD installation progress",
+    "Progreso de instalación de SteamCMD"
+  ],
+  "Terminal de diagnostic SteamCMD": [
+    "SteamCMD diagnostic terminal",
+    "Terminal de diagnóstico de SteamCMD"
+  ],
+  "Langue de l’interface": [
+    "Interface language",
+    "Idioma de la interfaz"
+  ],
+  "Anglais (par défaut)": [
+    "English (default)",
+    "Inglés (predeterminado)"
+  ],
+  "La langue du panneau ne modifie pas les serveurs, leurs noms ni leurs fichiers INI.": [
+    "The panel language does not change servers, their names or their INI files.",
+    "El idioma del panel no modifica los servidores, sus nombres ni sus archivos INI."
+  ],
+  "Règles du monde": [
+    "World rules",
+    "Reglas del mundo"
+  ],
+  "Progression & récolte": [
+    "Progression & harvesting",
+    "Progresión y recolección"
+  ],
+  "Apprivoisement": [
+    "Taming",
+    "Domesticación"
+  ],
+  "Élevage & imprégnation": [
+    "Breeding & imprinting",
+    "Cría e impronta"
+  ],
+  "Agriculture & durée du jour": [
+    "Farming & daylight",
+    "Agricultura y ciclo del día"
+  ],
+  "Survie & confort": [
+    "Survival & comfort",
+    "Supervivencia y comodidad"
+  ],
+  "Affichage": [
+    "Display",
+    "Visualización"
+  ],
+  "Déplacement & volants": [
+    "Movement & flyers",
+    "Movimiento y voladores"
+  ],
+  "Construction & confort": [
+    "Building & comfort",
+    "Construcción y comodidad"
+  ],
+  "Combat & PvE": [
+    "Combat & PvE",
+    "Combate y PvE"
+  ],
+  "Transferts": [
+    "Transfers",
+    "Transferencias"
+  ],
+  "Joueur : gains par point": [
+    "Player: gains per point",
+    "Jugador: ganancias por punto"
+  ],
+  "Dinos : points sauvages": [
+    "Dinos: wild points",
+    "Dinos: puntos salvajes"
+  ],
+  "Dinos apprivoisés : gains par point": [
+    "Tamed dinos: gains per point",
+    "Dinos domesticados: ganancias por punto"
+  ],
+  "Dinos : bonus additif à l’apprivoisement": [
+    "Dinos: additive taming bonus",
+    "Dinos: bono aditivo de domesticación"
+  ],
+  "Dinos : bonus d’efficacité d’apprivoisement": [
+    "Dinos: taming effectiveness bonus",
+    "Dinos: bono de eficacia de domesticación"
+  ],
+  "Mode PvE": [
+    "PvE mode",
+    "Modo PvE"
+  ],
+  "Active le mode joueur contre environnement.": [
+    "Enables player versus environment mode.",
+    "Activa el modo jugador contra entorno."
+  ],
+  "Niveau maximum des dinos sauvages": [
+    "Maximum wild dino level",
+    "Nivel máximo de dinos salvajes"
+  ],
+  "Plafond des dinos sauvages ordinaires. Agit aussi sur la qualité du butin et certains équilibrages de combat ; les dinos déjà présents gardent leur niveau.": [
+    "Level cap for ordinary wild dinos. Also affects loot quality and some combat scaling; existing dinos keep their levels.",
+    "Límite de nivel de los dinos salvajes normales. También afecta a la calidad del botín y a ciertos ajustes de combate; los dinos existentes conservan su nivel."
+  ],
+  "Difficulté native de cette carte inconnue. Choisissez un niveau maximum pour définir une surcharge explicite.": [
+    "This map's native difficulty is unknown. Choose a maximum level to set an explicit override.",
+    "Se desconoce la dificultad nativa del mapa. Elige un nivel máximo para establecer un valor explícito."
+  ],
+  "Bonus du mode solo natif": [
+    "Native single-player bonuses",
+    "Bonos nativos de un jugador"
+  ],
+  "Cumule des bonus cachés avec vos taux. Les préréglages du panneau le désactivent pour garder des taux prévisibles.": [
+    "Stacks hidden bonuses with your rates. Panel presets disable this to keep rates predictable.",
+    "Acumula bonos ocultos con tus tasas. Los perfiles del panel lo desactivan para mantener tasas predecibles."
+  ],
+  "Expérience": [
+    "Experience",
+    "Experiencia"
+  ],
+  "Plus élevé : progression des niveaux plus rapide.": [
+    "Higher: faster level progression.",
+    "Más alto: progresión de niveles más rápida."
+  ],
+  "Quantité de ressources": [
+    "Resource amount",
+    "Cantidad de recursos"
+  ],
+  "Plus élevé : davantage de ressources à chaque récolte.": [
+    "Higher: more resources per harvest.",
+    "Más alto: más recursos por recolección."
+  ],
+  "Résistance des ressources": [
+    "Resource node health",
+    "Resistencia de los recursos"
+  ],
+  "Plus élevé : les rochers et arbres nécessitent davantage de coups.": [
+    "Higher: rocks and trees take more hits.",
+    "Más alto: las rocas y los árboles requieren más golpes."
+  ],
+  "Délai de réapparition des ressources": [
+    "Resource respawn interval",
+    "Intervalo de reaparición de recursos"
+  ],
+  "Plus bas : les ressources réapparaissent plus vite, sous réserve des distances de blocage.": [
+    "Lower: resources respawn sooner, subject to blocking distances.",
+    "Más bajo: los recursos reaparecen antes, según las distancias de bloqueo."
+  ],
+  "Vitesse d’apprivoisement": [
+    "Taming speed",
+    "Velocidad de domesticación"
+  ],
+  "Plus élevé : apprivoisement plus rapide. Dépend aussi de la nourriture et de l’espèce.": [
+    "Higher: faster taming. Also depends on food and species.",
+    "Más alto: domesticación más rápida. También depende de la comida y la especie."
+  ],
+  "Consommation de nourriture des dinos": [
+    "Dino food drain",
+    "Consumo de comida de los dinos"
+  ],
+  "Agit aussi sur les intervalles de repas pendant l’apprivoisement.": [
+    "Also affects feeding intervals while taming.",
+    "También afecta a los intervalos de alimentación durante la domesticación."
+  ],
+  "Intervalle entre reproductions": [
+    "Mating cooldown",
+    "Intervalo entre reproducciones"
+  ],
+  "Plus bas : les femelles peuvent se reproduire plus souvent.": [
+    "Lower: females can mate more often.",
+    "Más bajo: las hembras pueden reproducirse más a menudo."
+  ],
+  "Vitesse d’accouplement": [
+    "Mating speed",
+    "Velocidad de apareamiento"
+  ],
+  "Plus élevé : accouplement plus rapide.": [
+    "Higher: faster mating.",
+    "Más alto: apareamiento más rápido."
+  ],
+  "Éclosion et gestation": [
+    "Hatching and gestation",
+    "Eclosión y gestación"
+  ],
+  "Plus élevé : incubation des œufs et gestation plus rapides.": [
+    "Higher: faster egg incubation and gestation.",
+    "Más alto: incubación y gestación más rápidas."
+  ],
+  "Croissance des bébés": [
+    "Baby maturation",
+    "Maduración de las crías"
+  ],
+  "Plus élevé : maturation plus rapide. À accorder avec l’intervalle de soins.": [
+    "Higher: faster maturation. Match this to the care interval.",
+    "Más alto: maduración más rápida. Ajústalo con el intervalo de cuidados."
+  ],
+  "Intervalle des soins": [
+    "Care interval",
+    "Intervalo de cuidados"
+  ],
+  "Plus bas : soins demandés plus tôt. 0,033333 équivaut à environ 16 minutes pour une base de 8 h.": [
+    "Lower: earlier care requests. 0.033333 gives about 16 minutes from an 8-hour baseline.",
+    "Más bajo: cuidados solicitados antes. 0,033333 equivale a unos 16 minutos con una base de 8 horas."
+  ],
+  "Imprégnation gagnée par soin": [
+    "Imprint gained per care",
+    "Impronta obtenida por cuidado"
+  ],
+  "Plus élevé : davantage d’imprégnation à chaque interaction. Le résultat dépend de l’espèce.": [
+    "Higher: more imprint per interaction. The result depends on species.",
+    "Más alto: más impronta por interacción. El resultado depende de la especie."
+  ],
+  "Bonus des statistiques d’imprégnation": [
+    "Imprinting stat bonus",
+    "Bono de estadísticas por impronta"
+  ],
+  "1 conserve le bonus normal. Les préréglages ne renforcent pas ce bonus.": [
+    "1 keeps the normal bonus. Presets do not increase it.",
+    "1 mantiene el bono normal. Los perfiles no lo aumentan."
+  ],
+  "Consommation des bébés": [
+    "Baby food consumption",
+    "Consumo de comida de las crías"
+  ],
+  "Plus bas : les bébés consomment moins de nourriture.": [
+    "Lower: babies consume less food.",
+    "Más bajo: las crías consumen menos comida."
+  ],
+  "Intervalle de ponte": [
+    "Egg laying interval",
+    "Intervalo de puesta"
+  ],
+  "Plus bas : les œufs non fécondés sont pondus plus souvent.": [
+    "Lower: unfertilized eggs are laid more often.",
+    "Más bajo: los huevos sin fecundar se ponen más a menudo."
+  ],
+  "Croissance des cultures": [
+    "Crop growth",
+    "Crecimiento de cultivos"
+  ],
+  "Plus élevé : les cultures poussent plus vite.": [
+    "Higher: crops grow faster.",
+    "Más alto: los cultivos crecen más rápido."
+  ],
+  "Vitesse du cycle jour / nuit": [
+    "Day / night cycle speed",
+    "Velocidad del ciclo día / noche"
+  ],
+  "Plus bas : journées et nuits plus longues.": [
+    "Lower: longer days and nights.",
+    "Más bajo: días y noches más largos."
+  ],
+  "Vitesse du jour": [
+    "Daytime speed",
+    "Velocidad del día"
+  ],
+  "Plus bas : le jour dure plus longtemps.": [
+    "Lower: daytime lasts longer.",
+    "Más bajo: el día dura más."
+  ],
+  "Vitesse de la nuit": [
+    "Nighttime speed",
+    "Velocidad de la noche"
+  ],
+  "Plus élevé : les nuits passent plus vite.": [
+    "Higher: nights pass faster.",
+    "Más alto: las noches pasan más rápido."
+  ],
+  "Faim du joueur": [
+    "Player hunger",
+    "Hambre del jugador"
+  ],
+  "Plus bas : le joueur a moins souvent faim.": [
+    "Lower: the player gets hungry less often.",
+    "Más bajo: el jugador tiene hambre con menos frecuencia."
+  ],
+  "Soif du joueur": [
+    "Player thirst",
+    "Sed del jugador"
+  ],
+  "Plus bas : le joueur a moins souvent soif.": [
+    "Lower: the player gets thirsty less often.",
+    "Más bajo: el jugador tiene sed con menos frecuencia."
+  ],
+  "Consommation d’endurance": [
+    "Stamina drain",
+    "Consumo de resistencia"
+  ],
+  "Plus bas : l’endurance du joueur diminue moins vite.": [
+    "Lower: player stamina drains more slowly.",
+    "Más bajo: la resistencia del jugador disminuye más despacio."
+  ],
+  "Récupération de santé": [
+    "Health regeneration",
+    "Regeneración de salud"
+  ],
+  "Plus élevé : récupération naturelle plus rapide.": [
+    "Higher: faster natural recovery.",
+    "Más alto: recuperación natural más rápida."
+  ],
+  "Poids gagné par niveau du joueur": [
+    "Player weight gained per level",
+    "Peso ganado por nivel del jugador"
+  ],
+  "Multiplie uniquement les points de poids investis par le joueur, sans modifier les dinos.": [
+    "Multiplies only the player's invested weight points, without changing dinos.",
+    "Multiplica solo los puntos de peso invertidos por el jugador, sin modificar los dinos."
+  ],
+  "Transport par les volants en PvE": [
+    "Flyer carrying in PvE",
+    "Transporte por voladores en PvE"
+  ],
+  "Autorise les volants à porter des créatures en PvE.": [
+    "Allows flyers to carry creatures in PvE.",
+    "Permite a los voladores transportar criaturas en PvE."
+  ],
+  "Position du joueur sur la carte": [
+    "Player map location",
+    "Posición del jugador en el mapa"
+  ],
+  "Affiche la position du joueur sur sa carte.": [
+    "Shows the player's position on the map.",
+    "Muestra la posición del jugador en el mapa."
+  ],
+  "Réticule": [
+    "Crosshair",
+    "Retícula"
+  ],
+  "Affiche le réticule de visée.": [
+    "Shows the aiming crosshair.",
+    "Muestra la retícula de apuntado."
+  ],
+  "Vue à la troisième personne": [
+    "Third-person view",
+    "Vista en tercera persona"
+  ],
+  "Autorise la vue à la troisième personne.": [
+    "Allows third-person view.",
+    "Permite la vista en tercera persona."
+  ],
+  "Nombres de dégâts": [
+    "Floating damage numbers",
+    "Números de daño"
+  ],
+  "Affiche les nombres de dégâts.": [
+    "Shows damage numbers.",
+    "Muestra los números de daño."
+  ],
+  "Vitesse du joueur et des dinos terrestres": [
+    "Player and land dino speed leveling",
+    "Mejora de velocidad del jugador y dinos terrestres"
+  ],
+  "Autorise l’investissement de points en vitesse dans ASA.": [
+    "Allows investing points in movement speed in ASA.",
+    "Permite invertir puntos en velocidad en ASA."
+  ],
+  "Vitesse des dinos volants": [
+    "Flyer speed leveling",
+    "Mejora de velocidad de voladores"
+  ],
+  "Nécessite aussi la vitesse du joueur et des dinos terrestres. Certaines espèces ou mods gardent leurs propres restrictions.": [
+    "Also requires player and land dino speed leveling. Some species or mods retain their own restrictions.",
+    "También requiere la mejora de velocidad del jugador y dinos terrestres. Algunas especies o mods mantienen sus propias restricciones."
+  ],
+  "Tout membre peut faire les soins": [
+    "Allow other players to imprint",
+    "Permitir que otros jugadores den cuidados"
+  ],
+  "Permet à un autre joueur d’effectuer les soins du bébé.": [
+    "Allows another player to perform baby care.",
+    "Permite que otro jugador cuide a la cría."
+  ],
+  "Construction : ignorer certaines collisions": [
+    "Building: relax placement collision",
+    "Construcción: relajar las colisiones"
+  ],
+  "Assouplit les collisions de placement des structures.": [
+    "Relaxes structure placement collision checks.",
+    "Relaja las comprobaciones de colisión al colocar estructuras."
+  ],
+  "Plusieurs étages sur selles plateformes": [
+    "Multiple floors on platform saddles",
+    "Varios pisos en monturas plataforma"
+  ],
+  "Autorise plusieurs étages sur les plateformes.": [
+    "Allows multiple floors on platforms.",
+    "Permite varios pisos en las plataformas."
+  ],
+  "Repère du corps": [
+    "Corpse locator",
+    "Localizador del cuerpo"
+  ],
+  "Affiche le repère de récupération du corps.": [
+    "Shows the corpse recovery marker.",
+    "Muestra el marcador para recuperar el cuerpo."
+  ],
+  "Ramassage permanent des structures": [
+    "Always allow structure pickup",
+    "Permitir recoger estructuras siempre"
+  ],
+  "Autorise le ramassage des structures sans limite de temps.": [
+    "Allows picking up structures without a time limit.",
+    "Permite recoger estructuras sin límite de tiempo."
+  ],
+  "Désactiver la dégradation des structures PvE": [
+    "Disable PvE structure decay",
+    "Desactivar el deterioro de estructuras PvE"
+  ],
+  "Conserve les structures PvE sans dégradation automatique.": [
+    "Preserves PvE structures without automatic decay.",
+    "Conserva las estructuras PvE sin deterioro automático."
+  ],
+  "Construction en grotte en PvE": [
+    "Cave building in PvE",
+    "Construcción en cuevas en PvE"
+  ],
+  "Autorise la construction dans les grottes PvE.": [
+    "Allows building in PvE caves.",
+    "Permite construir en cuevas PvE."
+  ],
+  "Construction en grotte en PvP": [
+    "Cave building in PvP",
+    "Construcción en cuevas en PvP"
+  ],
+  "Autorise la construction dans les grottes PvP.": [
+    "Allows building in PvP caves.",
+    "Permite construir en cuevas PvP."
+  ],
+  "Désactiver les dégâts alliés": [
+    "Disable friendly fire",
+    "Desactivar el fuego amigo"
+  ],
+  "Désactive les dégâts entre alliés.": [
+    "Disables damage between allies.",
+    "Desactiva el daño entre aliados."
+  ],
+  "Désactiver les dégâts alliés en PvE": [
+    "Disable PvE friendly fire",
+    "Desactivar el fuego amigo en PvE"
+  ],
+  "Désactive les dégâts alliés lorsque le serveur est en PvE.": [
+    "Disables friendly fire when the server is in PvE mode.",
+    "Desactiva el fuego amigo cuando el servidor está en modo PvE."
+  ],
+  "Recettes personnalisées": [
+    "Custom recipes",
+    "Recetas personalizadas"
+  ],
+  "Autorise les recettes personnalisées.": [
+    "Allows custom recipes.",
+    "Permite recetas personalizadas."
+  ],
+  "Interdire de monter les dinos": [
+    "Disable dino riding",
+    "Desactivar la monta de dinos"
+  ],
+  "Empêche de monter les dinos ; change fortement le gameplay.": [
+    "Prevents riding dinos; significantly changes gameplay.",
+    "Impide montar dinos; cambia mucho la experiencia de juego."
+  ],
+  "Interdire l’apprivoisement": [
+    "Disable taming",
+    "Desactivar la domesticación"
+  ],
+  "Désactive les nouveaux apprivoisements.": [
+    "Disables new tames.",
+    "Desactiva nuevas domesticaciones."
+  ],
+  "Bloquer les transferts de survivants": [
+    "Block survivor downloads",
+    "Bloquear transferencias de supervivientes"
+  ],
+  "Empêche le téléchargement de survivants sur ce serveur.": [
+    "Prevents downloading survivors onto this server.",
+    "Impide descargar supervivientes en este servidor."
+  ],
+  "Bloquer les transferts d’objets": [
+    "Block item downloads",
+    "Bloquear transferencias de objetos"
+  ],
+  "Empêche le téléchargement d’objets sur ce serveur.": [
+    "Prevents downloading items onto this server.",
+    "Impide descargar objetos en este servidor."
+  ],
+  "Bloquer les transferts de dinos": [
+    "Block dino downloads",
+    "Bloquear transferencias de dinos"
+  ],
+  "Empêche le téléchargement de dinos sur ce serveur.": [
+    "Prevents downloading dinos onto this server.",
+    "Impide descargar dinos en este servidor."
+  ],
+  "Densité des dinos sauvages": [
+    "Wild dino density",
+    "Densidad de dinos salvajes"
+  ],
+  "Dégâts du joueur": [
+    "Player damage",
+    "Daño del jugador"
+  ],
+  "Dégâts reçus par le joueur": [
+    "Damage taken by player",
+    "Daño recibido por el jugador"
+  ],
+  "Dégâts des dinos": [
+    "Dino damage",
+    "Daño de los dinos"
+  ],
+  "Dégâts reçus par les dinos": [
+    "Damage taken by dinos",
+    "Daño recibido por los dinos"
+  ],
+  "Puissance de récolte du joueur": [
+    "Player harvesting damage",
+    "Potencia de recolección del jugador"
+  ],
+  "Puissance de récolte des dinos": [
+    "Dino harvesting damage",
+    "Potencia de recolección de los dinos"
+  ],
+  "Délai de grâce des soins": [
+    "Care grace period",
+    "Período de gracia de los cuidados"
+  ],
+  "Perte de qualité des soins": [
+    "Imprint quality loss",
+    "Pérdida de calidad de impronta"
+  ],
+  "Qualité des caisses de butin": [
+    "Supply crate loot quality",
+    "Calidad del botín de suministros"
+  ],
+  "Qualité du butin de pêche": [
+    "Fishing loot quality",
+    "Calidad del botín de pesca"
+  ],
+  "Taille des piles d’objets": [
+    "Item stack size",
+    "Tamaño de las pilas de objetos"
+  ],
+  "Multiplicateur du réglage natif. Les mods peuvent modifier son effet.": [
+    "Native setting multiplier. Mods may change its effect.",
+    "Multiplicador del ajuste nativo. Los mods pueden cambiar su efecto."
+  ],
+  "Multiplie le gain de cette statistique par point. ×2 double le gain standard ; cela ne double pas toute la statistique. Pour la vitesse, activer aussi les cases correspondantes.": [
+    "Multiplies this stat's gain per point. ×2 doubles the standard gain, not the entire stat. Speed also requires the corresponding checkboxes.",
+    "Multiplica la ganancia de esta estadística por punto. ×2 duplica la ganancia normal, no toda la estadística. La velocidad también requiere las casillas correspondientes."
+  ],
+  "Bonus d’apprivoisement : effet selon l’espèce, distinct des gains par point.": [
+    "Taming bonus: species-dependent effect, separate from gains per point.",
+    "Bono de domesticación: depende de la especie y es independiente de las ganancias por punto."
+  ],
+  "Valeur du fichier": [
+    "Value from file",
+    "Valor del archivo"
+  ],
+  "Valeur de base proposée, absente du fichier": [
+    "Suggested default, absent from file",
+    "Valor predeterminado sugerido, ausente del archivo"
+  ],
+  "Valeur actuelle non reconnue. Elle sera conservée tant que vous ne modifiez pas ce réglage.": [
+    "Unrecognized current value. It will be preserved unless you change this setting.",
+    "Valor actual no reconocido. Se conservará mientras no cambies este ajuste."
+  ],
+  "Activé": [
+    "Enabled",
+    "Activado"
+  ],
+  "Valeur précise :": [
+    "Exact value:",
+    "Valor exacto:"
+  ],
+  "Santé —": [
+    "Health —",
+    "Salud —"
+  ],
+  "Endurance —": [
+    "Stamina —",
+    "Resistencia —"
+  ],
+  "Oxygène —": [
+    "Oxygen —",
+    "Oxígeno —"
+  ],
+  "Nourriture —": [
+    "Food —",
+    "Comida —"
+  ],
+  "Eau —": [
+    "Water —",
+    "Agua —"
+  ],
+  "Poids —": [
+    "Weight —",
+    "Peso —"
+  ],
+  "Dégâts de mêlée —": [
+    "Melee damage —",
+    "Daño cuerpo a cuerpo —"
+  ],
+  "Vitesse —": [
+    "Speed —",
+    "Velocidad —"
+  ],
+  "Résistance / fortitude —": [
+    "Fortitude —",
+    "Fortaleza —"
+  ],
+  "Compétence artisanale —": [
+    "Crafting skill —",
+    "Habilidad de fabricación —"
+  ],
+  "joueur": [
+    "player",
+    "jugador"
+  ],
+  "sauvage": [
+    "wild",
+    "salvaje"
+  ],
+  "dino apprivoisé": [
+    "tamed dino",
+    "dino domesticado"
+  ],
+  "bonus apprivoisement": [
+    "taming bonus",
+    "bono de domesticación"
+  ],
+  "Préparer ces réglages": [
+    "Prepare these settings",
+    "Preparar estos ajustes"
+  ],
+  "Solo PvE confort": [
+    "Comfortable solo PvE",
+    "PvE individual cómodo"
+  ],
+  "Duo PvE équilibré": [
+    "Balanced duo PvE",
+    "PvE dúo equilibrado"
+  ],
+  "XP ×2 · récolte ×3 · apprivoisement ×5 · élevage ×30": [
+    "XP ×2 · harvesting ×3 · taming ×5 · breeding ×30",
+    "XP ×2 · recolección ×3 · domesticación ×5 · cría ×30"
+  ],
+  "XP ×1,5 · récolte ×2 · apprivoisement ×3 · élevage ×15": [
+    "XP ×1.5 · harvesting ×2 · taming ×3 · breeding ×15",
+    "XP ×1,5 · recolección ×2 · domesticación ×3 · cría ×15"
+  ],
+  "Moins de corvées et d’attente pour une personne. Poids par niveau ×2. Ne modifie pas les dégâts ni la résistance. Bonus d’imprégnation standard.": [
+    "Less grinding and waiting for one player. Weight per level ×2. Damage and resistance stay unchanged. Standard imprinting bonuses.",
+    "Menos tareas y esperas para una persona. Peso por nivel ×2. No modifica el daño ni la resistencia. Bonos de impronta normales."
+  ],
+  "Progression plus proche du jeu de base pour deux joueurs, avec de l’élevage accéléré. Poids par niveau ×1,5. Ne modifie pas les dégâts ni la résistance.": [
+    "Progression closer to vanilla for two players, with faster breeding. Weight per level ×1.5. Damage and resistance stay unchanged.",
+    "Progresión más cercana al juego base para dos jugadores, con cría acelerada. Peso por nivel ×1,5. No modifica el daño ni la resistencia."
+  ],
+  "En ligne · RCON OK": [
+    "Online · RCON OK",
+    "En línea · RCON OK"
+  ],
+  "En ligne · jeu prêt": [
+    "Online · game ready",
+    "En línea · juego listo"
+  ],
+  "En lancement / à tester": [
+    "Starting / awaiting check",
+    "Iniciando / pendiente de prueba"
+  ],
+  "Ne répond pas au test RCON": [
+    "No RCON response",
+    "Sin respuesta RCON"
+  ],
+  "Mise à jour / vérification": [
+    "Updating / checking",
+    "Actualizando / comprobando"
+  ],
+  "Maintenance": [
+    "Maintenance",
+    "Mantenimiento"
+  ],
+  "Arrêté": [
+    "Stopped",
+    "Detenido"
+  ],
+  "À jour": [
+    "Up to date",
+    "Actualizado"
+  ],
+  "Inconnu": [
+    "Unknown",
+    "Desconocido"
+  ],
+  "À vérifier": [
+    "Not checked",
+    "Sin comprobar"
+  ],
+  "Version installée inconnue": [
+    "Installed version unknown",
+    "Versión instalada desconocida"
+  ],
+  "Build Steam installé": [
+    "Installed Steam build",
+    "Compilación Steam instalada"
+  ],
+  "Dernier build public ASA": [
+    "Latest public ASA build",
+    "Última compilación pública de ASA"
+  ],
+  "PORT DE JEU": [
+    "GAME PORT",
+    "PUERTO DE JUEGO"
+  ],
+  "PORT RCON": [
+    "RCON PORT",
+    "PUERTO RCON"
+  ],
+  "Favori dans le panneau": [
+    "Panel favorite",
+    "Favorito del panel"
+  ],
+  "☆ Favori": [
+    "☆ Favorite",
+    "☆ Favorito"
+  ],
+  "★ Favori": [
+    "★ Favorite",
+    "★ Favorito"
+  ],
+  "Rejoindre": [
+    "Join",
+    "Unirse"
+  ],
+  "Connexion directe / IP": [
+    "Direct connection / IP",
+    "Conexión directa / IP"
+  ],
+  "Arrêter proprement": [
+    "Stop gracefully",
+    "Detener correctamente"
+  ],
+  "Lancer le serveur": [
+    "Start server",
+    "Iniciar servidor"
+  ],
+  "Tester le serveur": [
+    "Test server",
+    "Probar servidor"
+  ],
+  "Vérifier la version ASA": [
+    "Check ASA version",
+    "Comprobar versión de ASA"
+  ],
+  "Confirmer la mise à jour": [
+    "Confirm update",
+    "Confirmar actualización"
+  ],
+  "Installer / valider les fichiers": [
+    "Install / validate files",
+    "Instalar / validar archivos"
+  ],
+  "Modifier": [
+    "Edit",
+    "Editar"
+  ],
+  "Supprimer": [
+    "Delete",
+    "Eliminar"
+  ],
+  "Le serveur doit être arrêté": [
+    "The server must be stopped",
+    "El servidor debe estar detenido"
+  ],
+  "Supprimer le profil, conserver les fichiers": [
+    "Delete profile, keep files",
+    "Eliminar perfil, conservar archivos"
+  ],
+  "À choisir avec Connexion directe": [
+    "Choose using Direct connection",
+    "Elegir con Conexión directa"
+  ],
+  "Aucun serveur lancé": [
+    "No servers running",
+    "No hay servidores en ejecución"
+  ],
+  "Aucun changement en attente.": [
+    "No pending changes.",
+    "Sin cambios pendientes."
+  ],
+  " — brouillon non enregistré.": [
+    " — unsaved draft.",
+    " — borrador sin guardar."
+  ],
+  " réglages modifiés": [
+    " settings changed",
+    " ajustes modificados"
+  ],
+  " réglage modifié": [
+    " setting changed",
+    " ajuste modificado"
+  ],
+  " réglages": [
+    " settings",
+    " ajustes"
+  ],
+  "Mémoire du processus": [
+    "Process memory",
+    "Memoria del proceso"
+  ],
+  "Durée de fonctionnement": [
+    "Uptime",
+    "Tiempo de actividad"
+  ],
+  "État": [
+    "Status",
+    "Estado"
+  ],
+  "RCON et port de jeu OK": [
+    "RCON and game port OK",
+    "RCON y puerto de juego correctos"
+  ],
+  "Jeu prêt · port UDP OK": [
+    "Game ready · UDP port OK",
+    "Juego listo · puerto UDP correcto"
+  ],
+  "Processus actif, RCON indisponible": [
+    "Process running, RCON unavailable",
+    "Proceso activo, RCON no disponible"
+  ],
+  "Aucun résultat": [
+    "No results",
+    "Sin resultados"
+  ],
+  "Serveur opérationnel localement : port UDP détenu par ARK et disponibilité confirmée. L’accès depuis un autre PC Tailscale reste à tester.": [
+    "Server is operational locally: ARK owns the UDP port and readiness is confirmed. Access from another Tailscale PC still needs testing.",
+    "Servidor operativo localmente: ARK tiene el puerto UDP y se confirma su disponibilidad. Falta probar el acceso desde otro PC Tailscale."
+  ],
+  "Serveur arrêté.": [
+    "Server stopped.",
+    "Servidor detenido."
+  ],
+  "Démarrage ou disponibilité du port de jeu non confirmé.": [
+    "Startup or game port availability is not confirmed.",
+    "Inicio o disponibilidad del puerto de juego sin confirmar."
+  ],
+  "Activer RCONEnabled=True dans [ServerSettings].": [
+    "Enable RCONEnabled=True in [ServerSettings].",
+    "Activa RCONEnabled=True en [ServerSettings]."
+  ],
+  "GameUserSettings.ini introuvable. Activer RCON et renseigner ServerAdminPassword.": [
+    "GameUserSettings.ini not found. Enable RCON and set ServerAdminPassword.",
+    "No se encuentra GameUserSettings.ini. Activa RCON y configura ServerAdminPassword."
+  ],
+  "RCON répond": [
+    "RCON responds",
+    "RCON responde"
+  ],
+  "Opération en cours…": [
+    "Operation in progress…",
+    "Operación en curso…"
+  ],
+  "En cours…": [
+    "In progress…",
+    "En curso…"
+  ],
+  "Chargement des réglages…": [
+    "Loading settings…",
+    "Cargando ajustes…"
+  ],
+  "Abandonner les modifications en cours pour ouvrir ce serveur ?": [
+    "Discard current changes to open this server?",
+    "¿Descartar los cambios actuales para abrir este servidor?"
+  ],
+  "Recharger et abandonner les modifications non enregistrées ?": [
+    "Reload and discard unsaved changes?",
+    "¿Recargar y descartar los cambios sin guardar?"
+  ],
+  "Abandonner les modifications non enregistrées pour changer de mode ?": [
+    "Discard unsaved changes to change mode?",
+    "¿Descartar los cambios sin guardar para cambiar de modo?"
+  ],
+  "Enregistrez vos brouillons avant de les exporter.": [
+    "Save your drafts before exporting.",
+    "Guarda los borradores antes de exportarlos."
+  ],
+  "Chargez les réglages avant de les enregistrer.": [
+    "Load the settings before saving.",
+    "Carga los ajustes antes de guardarlos."
+  ],
+  "Paramètres enregistrés.": [
+    "Settings saved.",
+    "Ajustes guardados."
+  ],
+  "Réglages enregistrés. Les autres paramètres sont conservés et les fichiers précédents ont été sauvegardés.": [
+    "Settings saved. Other parameters are preserved and previous files were backed up.",
+    "Ajustes guardados. Se conservan los demás parámetros y se ha creado una copia de los archivos anteriores."
+  ],
+  "Les réglages restent en brouillon.": [
+    "Settings remain a draft.",
+    "Los ajustes siguen siendo un borrador."
+  ],
+  "Profil enregistré.": [
+    "Profile saved.",
+    "Perfil guardado."
+  ],
+  "Profil supprimé. Les fichiers du serveur sont conservés.": [
+    "Profile deleted. Server files are preserved.",
+    "Perfil eliminado. Se conservan los archivos del servidor."
+  ],
+  "Processus lancé. Attendre la disponibilité du serveur dans ses journaux.": [
+    "Process started. Wait for the readiness message in its logs.",
+    "Proceso iniciado. Espera el mensaje de disponibilidad en sus registros."
+  ],
+  "Arrêter le serveur et attendre la fin des opérations.": [
+    "Stop the server and wait for operations to finish.",
+    "Detén el servidor y espera a que terminen las operaciones."
+  ],
+  "Une opération est en cours.": [
+    "An operation is in progress.",
+    "Hay una operación en curso."
+  ],
+  "Le serveur tourne déjà ou une opération est en cours.": [
+    "The server is already running or an operation is in progress.",
+    "El servidor ya está en ejecución o hay una operación en curso."
+  ],
+  "Adresse enregistrée pour ce serveur.": [
+    "Address saved for this server.",
+    "Dirección guardada para este servidor."
+  ],
+  "Adresse et favori enregistrés.": [
+    "Address and favorite saved.",
+    "Dirección y favorito guardados."
+  ],
+  "Adresse et port copiés.": [
+    "Address and port copied.",
+    "Dirección y puerto copiados."
+  ],
+  "Commande copiée.": [
+    "Command copied.",
+    "Comando copiado."
+  ],
+  "Commande à copier :": [
+    "Command to copy:",
+    "Comando para copiar:"
+  ],
+  "Adresse à copier :": [
+    "Address to copy:",
+    "Dirección para copiar:"
+  ],
+  "Tailscale détecté sur cette machine.": [
+    "Tailscale detected on this host.",
+    "Tailscale detectado en este equipo."
+  ],
+  "Aucune adresse Tailscale active détectée. Installez Tailscale, connectez-vous, puis actualisez.": [
+    "No active Tailscale address detected. Install Tailscale, sign in, then refresh.",
+    "No se detecta ninguna dirección Tailscale activa. Instala Tailscale, inicia sesión y actualiza."
+  ],
+  "Les adresses de jeu apparaîtront ici après détection de Tailscale et ajout de profils.": [
+    "Game addresses will appear here once Tailscale is detected and profiles are added.",
+    "Las direcciones de juego aparecerán aquí cuando se detecte Tailscale y se añadan perfiles."
+  ],
+  "Copier l’adresse": [
+    "Copy address",
+    "Copiar dirección"
+  ],
+  "Connexion": [
+    "Connection",
+    "Conexión"
+  ],
+  "Saisissez une adresse valide.": [
+    "Enter a valid address.",
+    "Introduce una dirección válida."
+  ],
+  "Adresse IPv6 invalide.": [
+    "Invalid IPv6 address.",
+    "Dirección IPv6 no válida."
+  ],
+  "Port de jeu du profil :": [
+    "Profile game port:",
+    "Puerto de juego del perfil:"
+  ],
+  "Ce profil utilise le port de jeu ": [
+    "This profile uses game port ",
+    "Este perfil usa el puerto de juego "
+  ],
+  ". Modifiez le profil pour changer de port.": [
+    ". Edit the profile to change its port.",
+    ". Edita el perfil para cambiar el puerto."
+  ],
+  "Ce serveur utilise le port de jeu ": [
+    "This server uses game port ",
+    "Este servidor usa el puerto de juego "
+  ],
+  ". Pour le changer, modifiez le profil du serveur.": [
+    ". To change it, edit the server profile.",
+    ". Para cambiarlo, edita el perfil del servidor."
+  ],
+  "Demande transmise à Steam. Si ASA reste au menu, utilisez Connexion directe / IP pour copier la commande.": [
+    "Request sent to Steam. If ASA stays at the menu, use Direct connection / IP to copy the command.",
+    "Solicitud enviada a Steam. Si ASA se queda en el menú, usa Conexión directa / IP para copiar el comando."
+  ],
+  "Complétez les valeurs valides pour actualiser les estimations.": [
+    "Enter valid values to update the estimates.",
+    "Introduce valores válidos para actualizar las estimaciones."
+  ],
+  "La référence doit être un nombre positif.": [
+    "The reference must be a positive number.",
+    "La referencia debe ser un número positivo."
+  ],
+  "Estimation indisponible :": [
+    "Estimate unavailable:",
+    "Estimación no disponible:"
+  ],
+  "Référence à ×1 : coups": [
+    "Reference at ×1: hits",
+    "Referencia a ×1: golpes"
+  ],
+  "Référence à ×1 : ressources": [
+    "Reference at ×1: resources",
+    "Referencia a ×1: recursos"
+  ],
+  "Endurance du Rex après apprivoisement": [
+    "Rex stamina after taming",
+    "Resistencia del Rex tras domesticarlo"
+  ],
+  "Exemple fictif initial : 10 coups / 100 ressources. Remplacez ces références par vos mesures avec le même outil. Ces références ne modifient pas les INI.": [
+    "Initial fictional example: 10 hits / 100 resources. Replace these references with your measurements using the same tool. These references do not change INI files.",
+    "Ejemplo inicial ficticio: 10 golpes / 100 recursos. Sustituye estas referencias por tus medidas con la misma herramienta. Estas referencias no modifican los INI."
+  ],
+  "Référence pour le calcul par point ; le total réel dépend des points du Rex. Ce champ ne modifie pas les INI.": [
+    "Reference for per-point calculations; the actual total depends on the Rex's points. This field does not change INI files.",
+    "Referencia para calcular la ganancia por punto; el total real depende de los puntos del Rex. Este campo no modifica los INI."
+  ],
+  "Préparer la vitesse classique joueur + volants": [
+    "Prepare classic player + flyer speed",
+    "Preparar velocidad clásica de jugador + voladores"
+  ],
+  "Vitesse joueur et volants préparée. Enregistrez puis redémarrez le serveur pour appliquer.": [
+    "Player and flyer speed prepared. Save, then restart the server to apply.",
+    "Velocidad de jugador y voladores preparada. Guarda y reinicia el servidor para aplicarla."
+  ],
+  "Dinos sauvages ordinaires : niveau maximum ": [
+    "Ordinary wild dinos: maximum level ",
+    "Dinos salvajes normales: nivel máximo "
+  ],
+  " · difficulté effective ": [
+    " · effective difficulty ",
+    " · dificultad efectiva "
+  ],
+  "Tek : environ ": [
+    "Tek: approximately ",
+    "Tek: aproximadamente "
+  ],
+  "Wyvernes / Rock Drakes : environ ": [
+    "Wyverns / Rock Drakes: approximately ",
+    "Wyverns / Rock Drakes: aproximadamente "
+  ],
+  " lorsqu’ils sont présents.": [
+    " where available.",
+    " cuando estén presentes."
+  ],
+  "Hors grottes, boss, missions et mods.": [
+    "Excludes caves, bosses, missions and mods.",
+    "Excluye cuevas, jefes, misiones y mods."
+  ],
+  "Les dinos déjà présents gardent leur niveau.": [
+    "Existing dinos keep their levels.",
+    "Los dinos existentes conservan su nivel."
+  ],
+  "Carte personnalisée : difficulté native inconnue. Renseignez OverrideOfficialDifficulty pour calculer un plafond fiable.": [
+    "Custom map: native difficulty unknown. Set a maximum level to calculate a reliable cap.",
+    "Mapa personalizado: dificultad nativa desconocida. Elige un nivel máximo para calcular un límite fiable."
+  ],
+  "Bonus solo natifs actifs : les calculs incluent les bonus de vitesse solo usuels. Les mods, événements et effets de monde ne sont pas inclus.": [
+    "Native single-player bonuses enabled: calculations include the usual single-player speed bonuses. Mods, events and world effects are excluded.",
+    "Bonos nativos de un jugador activos: los cálculos incluyen los bonos de velocidad habituales. Se excluyen mods, eventos y efectos del mundo."
+  ],
+  "Vitesse des volants activée mais vitesse générale désactivée : activez les deux cases pour ASA.": [
+    "Flyer speed is enabled but general speed is disabled: enable both checkboxes for ASA.",
+    "La velocidad de voladores está activada, pero la general no: activa ambas casillas para ASA."
+  ],
+  "Rex sauvage 150, inconscient, sans dégâts : environ ": [
+    "Wild Rex 150, unconscious, no damage: approximately ",
+    "Rex salvaje 150, inconsciente, sin daño: aproximadamente "
+  ],
+  " croquettes exceptionnelles en ": [
+    " Exceptional Kibble in ",
+    " croquetas excepcionales en "
+  ],
+  ", ou ": [
+    ", or ",
+    ", o "
+  ],
+  " viandes crues en ": [
+    " Raw Meat in ",
+    " carnes crudas en "
+  ],
+  "Estimation à nourriture disponible dès le départ ; pourrissement et narcotiques non comptés.": [
+    "Assumes food is available from the start; spoilage and narcotics are not included.",
+    "Supone comida disponible desde el principio; no incluye deterioro ni narcóticos."
+  ],
+  "Rex femelle : ": [
+    "Female Rex: ",
+    "Rex hembra: "
+  ],
+  " entre deux reproductions (tirage aléatoire ; les délais déjà en cours peuvent être conservés).": [
+    " between matings (random; existing cooldowns may be retained).",
+    " entre reproducciones (aleatorio; pueden mantenerse los tiempos ya iniciados)."
+  ],
+  " à ": [
+    " to ",
+    " a "
+  ],
+  "Rex : environ ": [
+    "Rex: approximately ",
+    "Rex: aproximadamente "
+  ],
+  " d’accouplement, si les parents restent à portée.": [
+    " of mating if the parents stay in range.",
+    " de apareamiento si los padres permanecen al alcance."
+  ],
+  "Œuf de Rex : environ ": [
+    "Rex egg: approximately ",
+    "Huevo de Rex: aproximadamente "
+  ],
+  " à température correcte (32–34 °C).": [
+    " at the correct temperature (32–34 °C).",
+    " a la temperatura adecuada (32–34 °C)."
+  ],
+  "Rex : adulte après ": [
+    "Rex: adult after ",
+    "Rex: adulto tras "
+  ],
+  " ; phase bébé environ ": [
+    "; baby stage approximately ",
+    "; fase de cría aproximadamente "
+  ],
+  "Le niveau 150 ne change pas ces durées.": [
+    "Level 150 does not change these durations.",
+    "El nivel 150 no cambia estas duraciones."
+  ],
+  "Rex : un soin toutes les ": [
+    "Rex: one care every ",
+    "Rex: un cuidado cada "
+  ],
+  " par soin ; ": [
+    " per care; ",
+    " por cuidado; "
+  ],
+  " soins pour 100 %. Dernier soin à ": [
+    " cares for 100%. Last care at ",
+    " cuidados para el 100 %. Último cuidado a "
+  ],
+  ", adulte à ": [
+    ", adult at ",
+    ", adulto a "
+  ],
+  "100 % théoriquement possible ; marge cumulée de retard : ": [
+    "100% theoretically possible; total delay allowance: ",
+    "100 % teóricamente posible; margen total de retraso: "
+  ],
+  "ATTENTION : 100 % impossible avant l’âge adulte ; maximum théorique ": [
+    "WARNING: 100% is impossible before adulthood; theoretical maximum ",
+    "ATENCIÓN: el 100 % es imposible antes de la edad adulta; máximo teórico "
+  ],
+  "Réduisez l’intervalle des soins, ralentissez la maturation ou augmentez le gain par soin.": [
+    "Reduce the care interval, slow maturation or increase the gain per care.",
+    "Reduce el intervalo de cuidados, ralentiza la maduración o aumenta la ganancia por cuidado."
+  ],
+  "Empreinte Rex : marge inférieure à une minute ; prévoyez plus de temps pour les actions et les retards.": [
+    "Rex imprint: less than one minute of slack; allow more time for actions and delays.",
+    "Impronta del Rex: margen inferior a un minuto; deja más tiempo para acciones y retrasos."
+  ],
+  "Rex nouveau-né : environ ": [
+    "Newborn Rex: approximately ",
+    "Rex recién nacido: aproximadamente "
+  ],
+  " points de nourriture/minute à la naissance ; le débit diminue avec l’âge.": [
+    " food points/minute at birth; the rate decreases with age.",
+    " puntos de comida/minuto al nacer; la tasa disminuye con la edad."
+  ],
+  "Pas une quantité de viande à prévoir : statistiques, gaspillage et pourrissement changent le besoin réel.": [
+    "This is not a meat supply estimate: stats, waste and spoilage change the actual requirement.",
+    "No es una estimación de carne necesaria: las estadísticas, el desperdicio y el deterioro cambian la necesidad real."
+  ],
+  "Exemple simplifié, même rocher et outil : référence ": [
+    "Simplified example, same rock and tool: reference ",
+    "Ejemplo simplificado, misma roca y herramienta: referencia "
+  ],
+  " coups / ": [
+    " hits / ",
+    " golpes / "
+  ],
+  " ressources à ×1 → environ ": [
+    " resources at ×1 → approximately ",
+    " recursos a ×1 → aproximadamente "
+  ],
+  " coups et ": [
+    " hits and ",
+    " golpes y "
+  ],
+  " ressources au total.": [
+    " resources in total.",
+    " recursos en total."
+  ],
+  "Référence personnalisable ; ce n’est pas une mesure universelle des rochers.": [
+    "Customizable reference; not a universal measurement of rocks.",
+    "Referencia personalizable; no es una medida universal de las rocas."
+  ],
+  "Butin aléatoire, outil, dégâts et sur-récolte peuvent changer le résultat.": [
+    "Random loot, tool, damage and overharvesting may change the result.",
+    "El botín aleatorio, la herramienta, el daño y la sobrerrecolección pueden cambiar el resultado."
+  ],
+  "Joueur : environ +": [
+    "Player: approximately +",
+    "Jugador: aproximadamente +"
+  ],
+  " endurance par point investi (base +10 à ×1).": [
+    " stamina per invested point (base +10 at ×1).",
+    " de resistencia por punto invertido (base +10 a ×1)."
+  ],
+  "Rex avec ": [
+    "Rex with ",
+    "Rex con "
+  ],
+  " endurance à l’apprivoisement : +": [
+    " stamina at taming: +",
+    " de resistencia al domesticarlo: +"
+  ],
+  " par point investi.": [
+    " per invested point.",
+    " por punto invertido."
+  ],
+  "Le total d’un Rex 150 varie selon la répartition aléatoire de ses points.": [
+    "A Rex 150's total depends on the random distribution of its points.",
+    "El total de un Rex 150 depende de la distribución aleatoria de sus puntos."
+  ],
+  " sur ": [
+    " of ",
+    " de "
+  ],
+  " libres": [
+    " free",
+    " libres"
+  ],
+  " processeurs logiques": [
+    " logical processors",
+    " procesadores lógicos"
+  ],
+  "Indéterminé": [
+    "Undetermined",
+    "Indeterminado"
+  ],
+  "SteamCMD est en cours d’initialisation. Attendez la fin de la préparation.": [
+    "SteamCMD is initializing. Wait for setup to finish.",
+    "SteamCMD se está inicializando. Espera a que termine la preparación."
+  ],
+  "Téléchargement de la version en cours…": [
+    "Downloading version…",
+    "Descargando versión…"
+  ],
+  "Télécharger et vérifier la dernière publication du dépôt configuré ?": [
+    "Download and verify the latest release from the configured repository?",
+    "¿Descargar y verificar la última versión del repositorio configurado?"
+  ],
+  "Dépôt et dernière publication vérifiés.": [
+    "Repository and latest release checked.",
+    "Repositorio y última versión comprobados."
+  ],
+  "Nouvelle version du panneau disponible. Enregistrez vos brouillons puis rechargez la page.": [
+    "A new panel version is available. Save your drafts, then reload the page.",
+    "Hay una nueva versión del panel. Guarda los borradores y recarga la página."
+  ],
+  "Connexion interrompue. Nouvelle tentative automatique.": [
+    "Connection interrupted. Retrying automatically.",
+    "Conexión interrumpida. Se reintentará automáticamente."
+  ],
+  "Version installée": [
+    "Installed version",
+    "Versión instalada"
+  ],
+  "Commit installé": [
+    "Installed commit",
+    "Commit instalado"
+  ],
+  "Dernière publication": [
+    "Latest release",
+    "Última versión"
+  ],
+  "Commit de main": [
+    "Main branch commit",
+    "Commit de main"
+  ],
+  "Dernière vérification": [
+    "Last checked",
+    "Última comprobación"
+  ],
+  "Mise à jour disponible": [
+    "Update available",
+    "Actualización disponible"
+  ],
+  "Aucune mise à jour disponible": [
+    "No update available",
+    "No hay actualizaciones disponibles"
+  ],
+  "Redémarrage du panneau ; les processus ARK restent en cours.": [
+    "Restarting the panel; ARK processes keep running.",
+    "Reiniciando el panel; los procesos ARK siguen activos."
+  ],
+  "Version téléchargée et vérifiée. Redémarrage automatique du panneau ; les serveurs ARK restent actifs.": [
+    "Version downloaded and verified. The panel restarts automatically; ARK servers keep running.",
+    "Versión descargada y verificada. El panel se reinicia automáticamente; los servidores ARK siguen activos."
+  ],
+  "Version déjà installée.": [
+    "Version already installed.",
+    "La versión ya está instalada."
+  ],
+  "Installation / initialisation en cours…": [
+    "Installing / initializing…",
+    "Instalando / inicializando…"
+  ],
+  "SteamCMD prêt :": [
+    "SteamCMD ready:",
+    "SteamCMD listo:"
+  ],
+  "SteamCMD détecté :": [
+    "SteamCMD detected:",
+    "SteamCMD detectado:"
+  ],
+  "En cours": [
+    "In progress",
+    "En curso"
+  ],
+  "Terminé": [
+    "Completed",
+    "Completado"
+  ],
+  "Échec": [
+    "Failed",
+    "Error"
+  ],
+  "Activer le démarrage automatique": [
+    "Enable automatic startup",
+    "Activar inicio automático"
+  ],
+  "Désactiver le démarrage automatique": [
+    "Disable automatic startup",
+    "Desactivar inicio automático"
+  ],
+  "Le niveau maximum doit être un entier entre 1 et 300.": [
+    "The maximum level must be an integer between 1 and 300.",
+    "El nivel máximo debe ser un entero entre 1 y 300."
+  ],
+  "Le panneau ne peut pas changer la langue.": [
+    "The panel could not change the language.",
+    "El panel no pudo cambiar el idioma."
+  ],
+  "Requête refusée.": [
+    "Request rejected.",
+    "Solicitud rechazada."
+  ],
+  "SteamCMD prépare l’opération…": [
+    "SteamCMD is preparing the operation…",
+    "SteamCMD está preparando la operación…"
+  ],
+  "Version différente / validation requise": [
+    "Different version / validation required",
+    "Versión diferente / validación necesaria"
+  ],
+  "Version non vérifiée": [
+    "Version not checked",
+    "Versión sin comprobar"
+  ],
+  "SteamCMD terminé avec une erreur. Consultez le terminal.": [
+    "SteamCMD finished with an error. Check the terminal.",
+    "SteamCMD terminó con un error. Consulta el terminal."
+  ],
+  "Pas encore vérifiée": [
+    "Not checked yet",
+    "Todavía sin comprobar"
+  ],
+  "Mise à jour prête à démarrer.": [
+    "Update ready to start.",
+    "Actualización lista para empezar."
+  ],
+  "Une publication différente est disponible.": [
+    "A different release is available.",
+    "Hay una versión diferente disponible."
+  ],
+  "Votre version correspond à la dernière publication.": [
+    "Your version matches the latest release.",
+    "Tu versión coincide con la última publicación."
+  ],
+  "Vérification en cours…": [
+    "Checking…",
+    "Comprobando…"
+  ],
+  "Saisissez l’identifiant technique fourni avec la carte modée.": [
+    "Enter the technical identifier supplied with the mod map.",
+    "Introduce el identificador técnico proporcionado con el mapa modificado."
+  ],
+  "Fermer sans enregistrer les modifications INI ?": [
+    "Close without saving INI changes?",
+    "¿Cerrar sin guardar los cambios INI?"
+  ],
+  "Téléchargement du bootstrap Valve…": [
+    "Downloading Valve bootstrap…",
+    "Descargando el iniciador de Valve…"
+  ],
+  "SteamCMD n’a pas été détecté après l’installation.": [
+    "SteamCMD was not detected after installation.",
+    "No se detectó SteamCMD después de la instalación."
+  ],
+  "Restaurer cette sauvegarde ? Le serveur doit être arrêté. L’ancien dossier Saved sera conservé.": [
+    "Restore this backup? The server must be stopped. The previous Saved folder will be kept.",
+    "¿Restaurar esta copia? El servidor debe estar detenido. Se conservará la carpeta Saved anterior."
+  ],
+  "Vérifiez la version avant la mise à jour.": [
+    "Check the version before updating.",
+    "Comprueba la versión antes de actualizar."
+  ],
+  "Abandonner les modifications INI ?": [
+    "Discard INI changes?",
+    "¿Descartar los cambios INI?"
+  ],
+  "Exécuter cette commande RCON : ": [
+    "Run this RCON command: ",
+    "Ejecutar este comando RCON: "
+  ],
+  "Dossier sélectionné. Cliquez sur Installer SteamCMD pour préparer l’outil à cet emplacement.": [
+    "Folder selected. Click Install SteamCMD to set up the tool there.",
+    "Carpeta seleccionada. Pulsa Instalar SteamCMD para preparar la herramienta allí."
+  ],
+  "Désactivé.": [
+    "Disabled.",
+    "Desactivado."
+  ],
+  "Commande copiée : collez-la dans la console ASA.": [
+    "Command copied: paste it into the ASA console.",
+    "Comando copiado: pégalo en la consola de ASA."
+  ],
+  "Commande sélectionnée : utilisez Ctrl+C pour la copier.": [
+    "Command selected: press Ctrl+C to copy.",
+    "Comando seleccionado: usa Ctrl+C para copiarlo."
+  ],
+  "Afficher tous les serveurs": [
+    "Show all servers",
+    "Mostrar todos los servidores"
+  ],
+  "Aucune maintenance exécutée.": [
+    "No maintenance has run.",
+    "No se ha ejecutado ningún mantenimiento."
+  ],
+  "Remplacer les brouillons par le profil importé ?": [
+    "Replace drafts with the imported profile?",
+    "¿Sustituir los borradores por el perfil importado?"
+  ],
+  " ? Une copie des INI précédents sera conservée.": [
+    "? A copy of the previous INI files will be kept.",
+    "? Se conservará una copia de los INI anteriores."
+  ],
+  "Abandonner les brouillons pour lire ce fichier ?": [
+    "Discard drafts to read this file?",
+    "¿Descartar los borradores para leer este archivo?"
+  ],
+  "Aucune section INI détectée.": [
+    "No INI section detected.",
+    "No se detectó ninguna sección INI."
+  ],
+  "Fichier lu en brouillon. Vérifiez le fichier cible puis Enregistrer. Les curseurs liront ensuite ces valeurs.": [
+    "File read as a draft. Check the target file, then Save. The sliders will then read these values.",
+    "Archivo leído como borrador. Comprueba el archivo de destino y guarda. Los controles leerán esos valores."
+  ],
+  "Utilisation": [
+    "Usage",
+    "Uso"
+  ],
+  "Utilisée": [
+    "Used",
+    "Usada"
+  ],
+  "Lecture": [
+    "Read",
+    "Lectura"
+  ],
+  "Écriture": [
+    "Write",
+    "Escritura"
+  ],
+  "Réception": [
+    "Receive",
+    "Recepción"
+  ],
+  "Émission": [
+    "Send",
+    "Envío"
+  ],
+  "En attente des premières mesures…": [
+    "Waiting for the first samples…",
+    "Esperando las primeras muestras…"
+  ],
+  "En attente…": [
+    "Waiting…",
+    "Esperando…"
+  ],
+  "Maintenant": [
+    "Now",
+    "Ahora"
+  ],
+  "Enregistrement indisponible : ": [
+    "Recording unavailable: ",
+    "Registro no disponible: "
+  ],
+  " mesures · ": [
+    " samples · ",
+    " muestras · "
+  ],
+  " · sauvegarde locale toutes les 10 s": [
+    " · saved locally every 10 s",
+    " · guardado local cada 10 s"
+  ],
+  "Historique ": [
+    "History ",
+    "Historial "
+  ],
+  " sur dix minutes. Flèches gauche et droite pour consulter les mesures.": [
+    " over ten minutes. Use the left and right arrows to inspect samples.",
+    " de diez minutos. Usa las flechas izquierda y derecha para consultar las muestras."
+  ],
+  "Courbe ": [
+    "Chart ",
+    "Gráfica "
+  ],
+  "Disque / E/S": [
+    "Disk / I/O",
+    "Disco / E/S"
+  ],
+  "Ressources de ce serveur": [
+    "This server's resources",
+    "Recursos de este servidor"
+  ],
+  "Compteurs d’entrées/sorties du processus Windows : ils peuvent inclure des E/S autres que le disque physique.": [
+    "Windows process I/O counters: may include I/O other than physical disk activity.",
+    "Contadores de E/S del proceso Windows: pueden incluir E/S distinta del disco físico."
+  ],
+  "Prêt": [
+    "Ready",
+    "Listo"
+  ],
+  "Non disponible": [
+    "Unavailable",
+    "No disponible"
+  ],
+  "Échec SteamCMD": [
+    "SteamCMD failed",
+    "Error de SteamCMD"
+  ],
+  "Échec de la requête": [
+    "Request failed",
+    "Error en la solicitud"
+  ],
+  "Format de profil incompatible.": [
+    "Incompatible profile format.",
+    "Formato de perfil incompatible."
+  ],
+  "Profil trop volumineux.": [
+    "Profile is too large.",
+    "El perfil es demasiado grande."
+  ],
+  "INI trop volumineux (1 Mo maximum).": [
+    "INI is too large (1 MB maximum).",
+    "El INI es demasiado grande (máximo 1 MB)."
+  ],
+  "Installation / validation des fichiers ASA…": [
+    "Installing / validating ASA files…",
+    "Instalando / validando archivos de ASA…"
+  ],
+  "Démarrage et vérification de SteamCMD…": [
+    "Starting and checking SteamCMD…",
+    "Iniciando y comprobando SteamCMD…"
+  ],
+  "Vérification de la version ASA…": [
+    "Checking ASA version…",
+    "Comprobando versión de ASA…"
+  ],
+  "Téléchargement de SteamCMD depuis Valve…": [
+    "Downloading SteamCMD from Valve…",
+    "Descargando SteamCMD desde Valve…"
+  ],
+  "sur ": [
+    "of ",
+    "de "
+  ],
+  "Gio": [
+    "GiB",
+    "GiB"
+  ],
+  "Mio/s": [
+    "MiB/s",
+    "MiB/s"
+  ],
+  "Kio/s": [
+    "KiB/s",
+    "KiB/s"
+  ],
+  "Mio": [
+    "MiB",
+    "MiB"
+  ],
+  "Kio": [
+    "KiB",
+    "KiB"
+  ],
+  "Tio": [
+    "TiB",
+    "TiB"
+  ],
+  "Progression plus proche du jeu de base pour deux joueurs, avec des temps d’attente réduits. Poids par niveau ×1,5.": [
+    "Progression closer to vanilla for two players, with shorter waiting times. Weight per level ×1.5.",
+    "Progresión más cercana al juego base para dos jugadores, con esperas reducidas. Peso por nivel ×1,5."
+  ],
+  "QR code vers https://tailscale.com/download": [
+    "QR code for https://tailscale.com/download",
+    "Código QR para https://tailscale.com/download"
+  ]
+}

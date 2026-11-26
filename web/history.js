@@ -8,20 +8,21 @@
     {id:'network',name:'Réseau',keys:['receivedBytesPerSec','transmittedBytesPerSec'],labels:['Réception','Émission'],unit:'Mio/s',factor:1024**2}
   ];
   let samples=[],latest=0;
-  const fmt=n=>n.toLocaleString('fr-FR',{maximumFractionDigits:2});
-  const clock=t=>new Date(t*1000).toLocaleTimeString('fr-FR');
+  const fmt=n=>n.toLocaleString((window.ArkI18n?.locale()||'fr-FR'),{maximumFractionDigits:2});
+  const unit=s=>window.ArkI18n?.translate(s)||s;
+  const clock=t=>new Date(t*1000).toLocaleTimeString((window.ArkI18n?.locale()||'fr-FR'));
   function inspect(figure,index){
     const def=definitions.find(d=>d.id===figure.dataset.chart);
     if(!samples.length)return;
     index=Math.max(0,Math.min(samples.length-1,index));figure.dataset.point=index;
     const point=samples[index];
-    figure.querySelector('.chart-reading').textContent=clock(point.at)+' · '+def.keys.map((k,i)=>def.labels[i]+' '+fmt((Number(point[k])||0)/(def.factor||1))+' '+def.unit).join(' · ');
+    figure.querySelector('.chart-reading').textContent=clock(point.at)+' · '+def.keys.map((k,i)=>def.labels[i]+' '+fmt((Number(point[k])||0)/(def.factor||1))+' '+unit(def.unit)).join(' · ');
   }
   window.renderHistory=m=>{
     const root=document.querySelector('#history-charts');if(!root)return;
     samples=(m.history||[]).filter(p=>Number.isFinite(p.at)&&p.at>=m.sampledAt-600&&p.at<=m.sampledAt);latest=m.sampledAt;
     document.querySelector('#history-status').textContent=m.historyPersistenceError?'Enregistrement indisponible : '+m.historyPersistenceError:samples.length?`${samples.length} mesures · ${clock(samples[0].at)} à ${clock(latest)} · sauvegarde locale toutes les 10 s`:'En attente des premières mesures…';
-    if(!root.children.length)root.innerHTML=definitions.map(d=>`<figure class="history-chart" data-chart="${d.id}" tabindex="0" aria-label="Historique ${d.name} sur dix minutes. Flèches gauche et droite pour consulter les mesures."><figcaption>${d.name} <small>${d.unit}</small></figcaption><svg viewBox="0 0 600 170" role="img" aria-label="Courbe ${d.name}"></svg><p class="chart-reading">En attente…</p><div class="chart-legend">${d.labels.map((label,i)=>`<span style="--series-color:${colors[i]}">${label}</span>`).join('')}</div></figure>`).join('');
+    if(!root.children.length)root.innerHTML=definitions.map(d=>`<figure class="history-chart" data-chart="${d.id}" tabindex="0" aria-label="Historique ${d.name} sur dix minutes. Flèches gauche et droite pour consulter les mesures."><figcaption>${d.name} <small>${unit(d.unit)}</small></figcaption><svg viewBox="0 0 600 170" role="img" aria-label="Courbe ${d.name}"></svg><p class="chart-reading">En attente…</p><div class="chart-legend">${d.labels.map((label,i)=>`<span style="--series-color:${colors[i]}">${label}</span>`).join('')}</div></figure>`).join('');
     for(const def of definitions){
       const figure=root.querySelector('[data-chart='+def.id+']');
       const max=def.scale||Math.max(def.id==='ram'?(m.memory?.totalBytes||0)/(def.factor||1):0,...samples.flatMap(p=>def.keys.map(k=>(Number(p[k])||0)/(def.factor||1))),0.1)*1.05;

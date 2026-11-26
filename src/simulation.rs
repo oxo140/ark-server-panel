@@ -30,6 +30,16 @@ fn map_difficulty(map: &str) -> Option<f64> {
         _ => None,
     }
 }
+pub fn max_wild_level(map: &str, offset: f64, over: f64, forced: bool) -> Option<u64> {
+    let d = if forced {
+        Some(5.)
+    } else if over > 0. {
+        Some(over)
+    } else {
+        map_difficulty(map).map(|b| offset * (b - 0.5) + 0.5)
+    };
+    d.map(|v| (v * 30.).round().max(1.) as u64)
+}
 pub fn preview(p: &Profile, changes: &Value, refs: &Value) -> Result<Value, String> {
     if changes.as_object().is_some_and(|m| !m.is_empty()) {
         config::validate_changes(changes)?;
@@ -43,8 +53,19 @@ pub fn preview(p: &Profile, changes: &Value, refs: &Value) -> Result<Value, Stri
         .iter()
         .map(|f| (f["key"].as_str().unwrap().into(), f["value"].clone()))
         .collect();
+    values.extend(
+        loaded["rawDifficulty"]
+            .as_object()
+            .cloned()
+            .unwrap_or_default(),
+    );
     if let Some(c) = changes.as_object() {
         values.extend(c.clone());
+    }
+    if let Some(level) = changes["MaxWildDinoLevel"].as_f64() {
+        values.insert("DifficultyOffset".into(), json!(1));
+        values.insert("OverrideOfficialDifficulty".into(), json!(level / 30.));
+        values.insert("MaxDifficulty".into(), json!(false));
     }
     Ok(calculate(&p.map, &values, refs))
 }
@@ -74,6 +95,7 @@ fn calculate(map: &str, v: &Map<String, Value>, refs: &Value) -> Value {
     ] {
         tips.insert(k.into(), json!(difficulty));
     }
+    tips.insert("MaxWildDinoLevel".into(), json!(difficulty));
     if over > 0. && !flag("MaxDifficulty") {
         tips.insert("DifficultyOffset".into(),json!(format!("{difficulty} OverrideOfficialDifficulty={over} est prioritaire : déplacer ce curseur ne change pas le plafond tant que la surcharge reste active.")));
     }

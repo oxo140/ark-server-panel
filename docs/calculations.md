@@ -1,5 +1,7 @@
 # Calculs des réglages (v1.8.0)
 
+Depuis la v2.0.0, l’interface expose uniquement `MaxWildDinoLevel`, un réglage virtuel du panneau (entier de 1 à 300). Il n’est jamais écrit comme clé dans un INI. Sa sauvegarde écrit `DifficultyOffset=1`, `OverrideOfficialDifficulty=niveau/30` et `MaxDifficulty=False` dans sa section native. Les anciennes clés restent acceptées à l’import et dans l’éditeur texte. Le chargement, les calculs et les changements de langue ne normalisent pas les fichiers existants ; seule une modification enregistrée du niveau le fait.
+
 Tous les calculs sont exécutés en Rust par `simulation::preview`. L’interface envoie le brouillon après une courte temporisation. Cette route ne sauvegarde aucun fichier et reste utilisable pendant que le serveur tourne. Les valeurs sont enregistrées uniquement avec le bouton d’enregistrement, serveur arrêté.
 
 ## Difficulté

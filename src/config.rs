@@ -876,7 +876,7 @@ fn advanced_schema() -> Vec<Setting> {
     ]
 }
 pub fn presets() -> Value {
-    let shared = json!({"ServerPVE":true,"DifficultyOffset":1,"OverrideOfficialDifficulty":5,"bUseSingleplayerSettings":false,"BabyImprintAmountMultiplier":2,"BabyImprintingStatScaleMultiplier":1,"AllowFlyerCarryPvE":true,"ShowMapPlayerLocation":true,"ServerCrosshair":true,"AllowThirdPersonPlayer":true});
+    let shared = json!({"ServerPVE":true,"MaxWildDinoLevel":150,"bUseSingleplayerSettings":false,"BabyImprintAmountMultiplier":2,"BabyImprintingStatScaleMultiplier":1,"AllowFlyerCarryPvE":true,"ShowMapPlayerLocation":true,"ServerCrosshair":true,"AllowThirdPersonPlayer":true});
     let mut solo = shared.clone();
     let mut duo = shared;
     solo.as_object_mut().unwrap().extend(json!({"XPMultiplier":2,"HarvestAmountMultiplier":3,"TamingSpeedMultiplier":5,"ResourcesRespawnPeriodMultiplier":0.5,"MatingIntervalMultiplier":0.1,"MatingSpeedMultiplier":2,"EggHatchSpeedMultiplier":30,"BabyMatureSpeedMultiplier":30,"BabyCuddleIntervalMultiplier":0.033333,"BabyFoodConsumptionSpeedMultiplier":0.5,"CropGrowthSpeedMultiplier":3,"LayEggIntervalMultiplier":0.5,"PlayerCharacterFoodDrainMultiplier":0.5,"PlayerCharacterWaterDrainMultiplier":0.5,"PerLevelStatsMultiplier_Player[7]":2,"NightTimeSpeedScale":2}).as_object().unwrap().clone());
@@ -1007,23 +1007,86 @@ fn read_file(p: &Profile, name: &str) -> Result<(bool, String), String> {
         Err(e) => Err(e.to_string()),
     }
 }
+fn maximum_level_setting() -> Setting {
+    number(
+        "MaxWildDinoLevel",
+        GUS,
+        "Niveau maximum des dinos sauvages",
+        "Règles du monde",
+        "Plafond des dinos sauvages ordinaires. Agit aussi sur la qualité du butin et certains équilibrages de combat ; les dinos déjà présents gardent leur niveau.",
+        (1., 300., 1.),
+        150.,
+    )
+}
 pub fn read(p: &Profile) -> Result<Value, String> {
     let (_, gus) = read_file(p, GUS)?;
     let (_, game) = read_file(p, GAME)?;
-    let fields:Vec<_>=schema().iter().map(|s|{
+    let mut fields:Vec<_>=schema().iter().map(|s|{
         let raw=read_value(if s.file==GUS{&gus}else{&game},s.section,s.key);
         let parsed=raw.as_ref().and_then(|v|if s.kind=="boolean" {match v.to_ascii_lowercase().as_str(){"true"|"1"=>Some(json!(true)),"false"|"0"=>Some(json!(false)),_=>None}}else{v.parse::<f64>().ok().filter(|n|n.is_finite()).map(|n|json!(n))});
         let mut field=serde_json::to_value(s).unwrap();field["configured"]=json!(raw.is_some());field["value"]=parsed.clone().unwrap_or_else(||s.default.clone());
         field["warning"]=if raw.is_some()&&parsed.is_none(){json!("Valeur actuelle non reconnue. Elle sera conservée tant que vous ne modifiez pas ce réglage.")}else{Value::Null};field
     }).collect();
+    let difficulty_keys = [
+        "DifficultyOffset",
+        "OverrideOfficialDifficulty",
+        "MaxDifficulty",
+    ];
+    let raw: serde_json::Map<String, Value> = fields
+        .iter()
+        .filter(|f| difficulty_keys.contains(&f["key"].as_str().unwrap_or_default()))
+        .map(|f| (f["key"].as_str().unwrap().to_string(), f["value"].clone()))
+        .collect();
+    let configured = fields.iter().any(|f| {
+        difficulty_keys.contains(&f["key"].as_str().unwrap_or_default()) && f["configured"] == true
+    });
+    let raw_warning = fields
+        .iter()
+        .filter(|f| difficulty_keys.contains(&f["key"].as_str().unwrap_or_default()))
+        .find_map(|f| f["warning"].as_str().map(str::to_owned));
+    let level = crate::simulation::max_wild_level(
+        &p.map,
+        raw["DifficultyOffset"].as_f64().unwrap_or(1.),
+        raw["OverrideOfficialDifficulty"].as_f64().unwrap_or(0.),
+        raw["MaxDifficulty"].as_bool().unwrap_or(false),
+    );
+    let mut maximum = serde_json::to_value(maximum_level_setting()).unwrap();
+    maximum["value"] = json!(level.unwrap_or(150));
+    maximum["configured"] = json!(configured);
+    maximum["virtual"] = json!(true);
+    maximum["warning"] = if level.is_none() {
+        json!(
+            "Difficulté native de cette carte inconnue. Choisissez un niveau maximum pour définir une surcharge explicite."
+        )
+    } else {
+        raw_warning.map_or(Value::Null, Value::String)
+    };
+    let index = fields
+        .iter()
+        .position(|f| f["key"] == "DifficultyOffset")
+        .unwrap_or(0);
+    fields.retain(|f| !difficulty_keys.contains(&f["key"].as_str().unwrap_or_default()));
+    fields.insert(index, maximum);
     Ok(
-        json!({"fields":fields,"hashes":{"GameUserSettings.ini":hash(gus.as_bytes()),"Game.ini":hash(game.as_bytes())},"presets":presets()}),
+        json!({"fields":fields,"rawDifficulty":raw,"hashes":{"GameUserSettings.ini":hash(gus.as_bytes()),"Game.ini":hash(game.as_bytes())},"presets":presets()}),
     )
 }
 pub fn validate_changes(changes: &Value) -> Result<Vec<(Setting, String)>, String> {
     let object = changes.as_object().ok_or("Liste de réglages invalide")?;
     if object.is_empty() {
         return Err("Aucun réglage modifié.".into());
+    }
+    if let Some(level) = object.get("MaxWildDinoLevel") {
+        let n = level
+            .as_f64()
+            .filter(|n| n.is_finite() && *n >= 1. && *n <= 300. && n.fract() == 0.)
+            .ok_or("Le niveau maximum doit être un entier entre 1 et 300.")?;
+        let mut expanded = object.clone();
+        expanded.remove("MaxWildDinoLevel");
+        expanded.insert("DifficultyOffset".into(), json!(1));
+        expanded.insert("OverrideOfficialDifficulty".into(), json!(n / 30.));
+        expanded.insert("MaxDifficulty".into(), json!(false));
+        return validate_changes(&Value::Object(expanded));
     }
     let definitions = schema();
     let mut result = vec![];
@@ -1297,6 +1360,61 @@ mod tests {
         assert!(game.contains("OverrideEngramEntries=A\nOverrideEngramEntries=B"));
         let keys: std::collections::HashSet<_> = schema().iter().map(|s| s.key).collect();
         assert_eq!(keys.len(), schema().len());
+        fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn single_level_control_migrates_and_saves_native_difficulty_safely() {
+        let (root, p) = fixture();
+        write_fixture(&p);
+        let gus = model::ini_path(&p, GUS).unwrap();
+        let game = model::ini_path(&p, GAME).unwrap();
+        fs::write(
+            &gus,
+            "[ServerSettings]\nDifficultyOffset=0.7\nOverrideOfficialDifficulty=10\nUnknown=keep\n",
+        )
+        .unwrap();
+        fs::write(&game,"[ShooterGameMode_Options]\nMaxDifficulty=True\n[/Script/ShooterGame.ShooterGameMode]\nOther=keep\n").unwrap();
+        let before = read(&p).unwrap();
+        let fields = before["fields"].as_array().unwrap();
+        assert_eq!(
+            fields
+                .iter()
+                .find(|f| f["key"] == "MaxWildDinoLevel")
+                .unwrap()["value"],
+            150
+        );
+        assert!(!fields.iter().any(|f| f["key"] == "DifficultyOffset"
+            || f["key"] == "OverrideOfficialDifficulty"
+            || f["key"] == "MaxDifficulty"));
+        let untouched = fs::read(&gus).unwrap();
+        save(
+            &p,
+            &before["hashes"],
+            &json!({"PerLevelStatsMultiplier_Player[1]":2}),
+        )
+        .unwrap();
+        assert_eq!(fs::read(&gus).unwrap(), untouched);
+        let current = read(&p).unwrap();
+        save(&p, &current["hashes"], &json!({"MaxWildDinoLevel":180})).unwrap();
+        let gus_text = fs::read_to_string(&gus).unwrap();
+        let game_text = fs::read_to_string(&game).unwrap();
+        assert_eq!(
+            read_value(&gus_text, SERVER, "DifficultyOffset").as_deref(),
+            Some("1")
+        );
+        assert_eq!(
+            read_value(&gus_text, SERVER, "OverrideOfficialDifficulty").as_deref(),
+            Some("6")
+        );
+        assert_eq!(
+            read_value(&game_text, "ShooterGameMode_Options", "MaxDifficulty").as_deref(),
+            Some("False")
+        );
+        assert!(gus_text.contains("Unknown=keep"));
+        assert!(game_text.contains("Other=keep"));
+        assert!(!gus_text.contains("MaxWildDinoLevel"));
+        assert!(validate_changes(&json!({"MaxWildDinoLevel":150.5})).is_err());
+        assert!(validate_changes(&json!({"MaxWildDinoLevel":301})).is_err());
         fs::remove_dir_all(root).unwrap();
     }
 }
